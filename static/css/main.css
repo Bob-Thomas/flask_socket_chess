@@ -1,0 +1,173 @@
+/*! HTML5 Boilerplate v4.3.0 | MIT License | http://h5bp.com/ */
+
+/*
+ * What follows is the result of much research on cross-browser styling.
+ * Credit left inline and big thanks to Nicolas Gallagher, Jonathan Neal,
+ * Kroc Camen, and the H5BP dev community and team.
+ */
+
+/* ==========================================================================
+   Base styles: opinionated defaults
+   ========================================================================== */
+@import url(http://fonts.googleapis.com/css?family=Oswald);
+
+
+body{
+    background-size:150%;
+    background-repeat: no-repeat;
+    background-image: url('../img/bg.jpg');
+}
+.boardTable{
+    margin-left:auto;
+    margin-right:auto;
+    width:600px;
+    height:600px;
+}
+td{
+    width:75px;
+    height:75px;
+    color:red;
+}
+tbody tr:nth-child(odd) td:nth-child(even),
+tbody tr:nth-child(even) td:nth-child(odd) {
+    color: #fff;
+    background-color: #966234;
+}
+
+tbody tr:nth-child(even) td:nth-child(even),
+tbody tr:nth-child(odd) td:nth-child(odd) {
+    background-color: #3a2415;
+}
+.boardTable{
+    width:600px;
+    height:600px;
+}
+.overlayTile{
+    position:inherit;
+    height: 75px;
+    width: 75px;
+    background: rgba(63, 71, 255, 0.56);
+}
+.overlayTile.blocked{
+    background: rgba(244, 0, 25, 0.65);
+}
+.overlayTile.strikeAble{
+    background: rgba(244, 212, 0, 0.65);
+
+}
+.overlayTile.friendly{
+    background: rgba(88, 244, 13, 0.65);
+}
+
+
+
+.box{
+    display:block;
+    width:450px;
+
+}
+.box.login{
+    font-family: 'Oswald', sans-serif;
+    margin-top:250px;
+    overflow:visible;
+    margin-left:40%;
+    float:left;
+    border-radius:10px;
+    #background: rgba(0, 0, 0, 0.30);
+}
+.box.login .login-inputs{
+    margin-top: 20%;
+    margin-left: 17%;
+    width:400px;
+}
+
+.box.login .box-title h2,.box-footer h2{
+    font-size: 2.5em;
+}
+.hidden{
+    display:none;
+}
+input[type=text], input[type=password],input[type=email]{
+    background:white;
+    text-align: center;
+    font-size: 1.6em;
+    margin-top:20px;
+    border-radius: 10px;
+    height:42px;
+    width:300px;
+    border: none;
+    color:gray;
+    -webkit-transition:border 1s;
+    -webkit-transition:color 1s;
+    -webkit-transition:border-radius 1s;
+}
+input{
+    outline:none;
+}
+input[type=text]:focus, input[type=password]:focus,input[type=email]:focus{
+    border-radius:15px;
+    font-weight: bold;
+    -webkit-transition:border-radius 1s;
+
+}
+
+input[type=submit]{
+    color:gray;
+    font-size: 1.2em;
+    height:50px;
+    width:150px;
+    border-radius: 10px;
+    background: #ffffff;
+    border:none;
+    margin-top:20px;
+    -webkit-transition:background 500ms;
+}
+.rightButton{
+    margin-left:15px;
+}
+.leftButton{
+    margin-left:-10px;
+}
+input[type=submit]:hover{
+    background: rgb(155, 184, 197);
+    -webkit-transition:background 250ms;
+}
+.loader{
+    margin-top: 25%;
+    margin-left: 52%;
+    color:white;
+
+}
+.box.login .input-correct{
+    background:lightGreen;
+}
+.box.login .input-error{
+    background:#D87D7D;
+}
+.disabled{
+    background:gray;
+    opacity:0.5;
+}
+.inline-error{
+    margin-left: 18px;
+    margin-top: 23px;
+    width: auto;
+    position: absolute;
+    color: red;
+    font-size: 1.2em;
+}
+.inline-correct{
+    color: #b4ff91;
+    font-size:2em;
+    margin-top:10px;
+}
+
+
+
+
+.connecting{
+    display:none;
+}
+.hidden{
+    display:none;
+}
