@@ -1,44 +1,61 @@
-app.controller('loginControl',['$scope','socket','$interval', function($scope,socket){
-        $scope.loginInput =
-        {
-            username:{
-                error:false
-                ,name:$scope.username
-            },
-            password:{
-                error:false
-                ,name:$scope.password
-            },
-            passwordRepeat:{
-                error:false
-                ,name:$scope.passwordRepeat
-            },
-            email:{
-                error:false
-                ,name:$scope.email
-            }
+app.controller('loginControl',['$scope','socket','$http', function($scope,socket,$http){
+    $scope.state  = 'login';
+    $scope.loginInput =
+    {
+        username:{
+            state:'neutral'
+        },
+        password:{
+            state:'neutral'
+        },
+        passwordRepeat:{
+            state:'neutral'
+        },
+        email:{
+            state:'neutral'
         }
+    }
 
-        $scope.validateInput = function(name,element){
-            if(name === "password " || name === "password-repeat"){
-                var password,
-                    passwordRepeat;
-                password = $scope.password;
-                passwordRepeat = $scope.passwordRepeat;
+    $scope.validateInput = function(name,element){
+        if(name === "password" || name === "passwordRepeat"){
+            var password,
+                passwordRepeat;
+            password = $scope.password;
+            passwordRepeat = $scope.passwordRepeat;
 
-                if(password === passwordRepeat && passwordRepeat === password){
-                   $scope.loginInput.password.error = false;
-                   $scope.loginInput.passwordRepeat.error = false;
+            if(password === passwordRepeat && passwordRepeat === password){
+                $scope.loginInput.password.state = 'correct';
+                $scope.loginInput.passwordRepeat.state = 'correct';
 
-                }
-                else{
-                    $scope.loginInput.password.error = true;
-                    $scope.loginInput.passwordRepeat.error = true;
-                }
             }
             else{
-                socket.emit('verify',{name:name,value:value})
+                $scope.loginInput.password.state = 'error';
+                $scope.loginInput.passwordRepeat.state = 'error';
             }
         }
+        else{
+            socket.emit('verify',{name:name,value:element})
+        }
+
+    }
+
+    $scope.submitRegister = function(){
+
+    }
+
+    $scope.submitLogin = function(){
+        var data = {
+            username:$scope.username,
+            password:$scope.password
+        }
+        $http({
+            method: 'POST',
+            url: '',
+            data: data,
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+        });
+
+    }
+
 
 }]);

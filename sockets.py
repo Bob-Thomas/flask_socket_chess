@@ -4,6 +4,7 @@ from socketio import socketio_manage
 from socketio.namespace import BaseNamespace
 from socketio.mixins import RoomsMixin, BroadcastMixin
 from flask.ext.sqlalchemy import SQLAlchemy
+import re
 import database
 
 # The socket.io namespace
@@ -50,8 +51,11 @@ def checkUser(type,value, table):
             else:
                 return False
     elif type == 'email':
-        for u in result:
-            if u.email == value:
-                return True
-            else:
-                return False
+        if re.match(r'^[_\.0-9a-zA-Z-+]+@([0-9a-zA-Z][0-9a-zA-Z-]+\.)+[a-zA-Z]{2,6}$', value):
+            for u in result:
+                if u.email.lower() == value.lower():
+                    return True
+                else:
+                    return False
+        else:
+            return 'invalid'

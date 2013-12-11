@@ -12,10 +12,11 @@ Chess = chess.Chess
 # Flask routes
 app = Flask(__name__)
 app.config.from_object('config')
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
-        print "yata"
+        print request.form
         return redirect(url_for('index'))
     return render_template('login.html')
 

@@ -10,15 +10,14 @@
 
 </head>
 <body ng-app="app">
-<div class="container">
+<div class="container" ng-controller="loginControl">
     <login-Widget>
         <div class="loader"><i class="fa fa-cog  fa-5x fa-spin"></i></div>
         <div  class="box login hidden"  >
             <div class="box-title">
             </div>
-            <form action='' method='post' >
 
-                <div class="login-inputs" ng-controller="loginControl">
+                <div class="login-inputs" >
                     {% raw %}
                     <input type="text" id="username" name="username"   placeholder="Username" ng-model="username"  ng-blur='validateInput("username",username)' autocomplete="off" />
 
@@ -26,21 +25,20 @@
 
                     <div class="register-box">
 
-                        <input type="password"  id="password-repeat" ng-model="passwordRepeat"  name="password-repeat" ng-blur='validateInput("password-repeat",passwordRepeat)'  placeholder="repeat passsword"  />
+                        <input type="password"  id="passwordRepeat" ng-model="passwordRepeat"  name="passwordRepeat" ng-blur='validateInput("passwordRepeat",passwordRepeat)'  placeholder="repeat passsword"/>
 
 
-                        <input type="text"  id="email" name="email" placeholder="Email"  ng-model="email"  autocomplete="off" />
+                        <input type="text"  id="email" name="email" placeholder="Email"  ng-model="email"  ng-blur='validateInput("email",email)' autocomplete="off"  />
 
 
                     </div>
                     <input type="submit"  class="leftButton hidden" id='back' name="back" value="Back"  />
 
-                    <input type="submit"  class="leftButton" id='register' name="register" value="No acount ?" />
+                    <input type="submit" ng-click="submitRegister()"  class="leftButton" id='register' name="register" value="No acount ?" />
 
-                    <input type="submit" class="rightButton "id='login' name="login" value="Login"/>
+                    <input type="submit" ng-click="submitLogin()" class="rightButton" submit="loginForm"   id='login' name="login" value="Login"/>
                     {% endraw %}
                 </div>
-            </form>
 
             <div class="box-footer">
 
