@@ -15,14 +15,11 @@ class Chess(BaseNamespace, RoomsMixin, BroadcastMixin):
         self.emit_to_room('main_room', 'move enemy', data)
         print "ALA AKBHAR"
 
-    def on_nickname(self, nickname):
-        self.emit('check clients', self.amount)
-        self.environ.setdefault('nicknames', []).append(nickname)
+    def on_join(self, nickname):
         self.socket.session['nickname'] = nickname
         self.broadcast_event('announcement', '%s has connected' % nickname)
-        self.broadcast_event('nicknames', self.environ['nicknames'])
         # Just have them join a default-named room
-        self.join('main_room')
+        self.join('lobby')
         print "connected"
 
 
@@ -39,23 +36,23 @@ class Chess(BaseNamespace, RoomsMixin, BroadcastMixin):
             print checkUser(data['name'],data['value'], database.User,)
             self.emit('validation', {'name':data['name'],'answer': checkUser(data['name'],data['value'], database.User,)})
 
-
 def checkUser(type,value, table):
+    result = ''
     if not value:
         return True
     result = table.query.all()
     if type == 'username':
         for u in result:
-            if u.username == value:
+            if u.username.lower() == value.lower():
                 return True
-            else:
-                return False
+        else:
+            return False
     elif type == 'email':
         if re.match(r'^[_\.0-9a-zA-Z-+]+@([0-9a-zA-Z][0-9a-zA-Z-]+\.)+[a-zA-Z]{2,6}$', value):
             for u in result:
                 if u.email.lower() == value.lower():
                     return True
-                else:
-                    return False
+            else:
+                return False
         else:
             return 'invalid'

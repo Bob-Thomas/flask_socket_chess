@@ -40,17 +40,33 @@ app.controller('loginControl',['$scope','socket','$http', function($scope,socket
     }
 
     $scope.submitRegister = function(){
+        var data = $.param({
+            type:'register',
+            username:$scope.username,
+            password:$scope.password,
+            repeat:$scope.passwordRepeat,
+            email:$scope.email
+        });
+        if($scope.state === "register"){
+            $http({
+                method: 'POST',
+                url: '/',
+                data: data,
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+            });
+        }
 
     }
 
     $scope.submitLogin = function(){
-        var data = {
+        var data = $.param({
+            type:'login',
             username:$scope.username,
             password:$scope.password
-        }
+        });
         $http({
             method: 'POST',
-            url: '',
+            url: '/',
             data: data,
             headers: {'Content-Type': 'application/x-www-form-urlencoded'}
         });
