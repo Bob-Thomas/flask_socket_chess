@@ -8,6 +8,7 @@ import re
 import database
 
 # The socket.io namespace
+rooms = []
 
 class Chess(BaseNamespace, RoomsMixin, BroadcastMixin):
 
@@ -21,6 +22,18 @@ class Chess(BaseNamespace, RoomsMixin, BroadcastMixin):
         # Just have them join a default-named room
         self.join('lobby')
         print "connected"
+    def on_create(self, data):
+        print data
+        self.join(data['roomName'])
+        self.room = {
+            'name': data['roomName'],
+            'players': 1,
+            'inPlay': False
+
+        }
+        print rooms
+        rooms.append(self.room)
+        self.broadcast_event('lobbyCreated', rooms)
 
 
     def on_user_message(self, msg):
@@ -29,14 +42,15 @@ class Chess(BaseNamespace, RoomsMixin, BroadcastMixin):
     def recv_message(self, message):
         print "PING!!!", message
 
-    def on_verify(self,data):
+    def on_verify(self, data):
         if data.has_key('value'):
             print data['value']
             print "validating"
             print checkUser(data['name'],data['value'], database.User,)
             self.emit('validation', {'name':data['name'],'answer': checkUser(data['name'],data['value'], database.User,)})
 
-def checkUser(type,value, table):
+
+def checkUser(type ,value, table):
     result = ''
     if not value:
         return True

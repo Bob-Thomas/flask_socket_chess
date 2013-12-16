@@ -1,0 +1,29 @@
+<style>
+    th, td
+    {
+        border: 1px solid grey;
+    }
+</style>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+
+
+
+
+<h3><?php echo $header; ?></h3>
+<table>
+    <tr id="hourTable">
+        <th>soort uren</th>
+        <th>aantal uren</th>
+        <th>gebruiker</th>
+    </tr>
+    <?php echo $table; ?>
+</table>
+
+
+<script type='text/javascript'>
+    $(function(){
+        for(var i=0;i<32;i++){
+            $("#hourTable").append("<th>"+i+"</th>");
+        }
+    }())
+</script>

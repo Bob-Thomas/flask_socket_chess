@@ -43,12 +43,14 @@ app.directive('loginWidget',function($rootScope,socket){
         })
 
         scope.$watch('loginInput',function(){
-            var loginObject = scope.loginInput;
+            var
+                loginObject = scope.loginInput
+            ;
+
             for(var key in loginObject){
                 if(loginObject.hasOwnProperty(key)){
                     var input = $('#'+key);
                     // console.log(loginObject[key].state)
-                    console.log(input,loginObject[key].state)
                     styleInput(input,loginObject[key].state)
                 }
 
@@ -161,7 +163,7 @@ app.directive('loginWidget',function($rootScope,socket){
                 }
             }
             if(scope.state == 'register'){
-                if($("input").length-3 === $("input.input-correct").length){
+                if($("input").length-4 === $("input.input-correct").length){
                     $("#register").removeAttr('disabled').removeClass('disabled');
                 }
                 else{
@@ -173,40 +175,43 @@ app.directive('loginWidget',function($rootScope,socket){
 
         }
 
-        registerButton = function(){
+        registerButton = function(e){
+            //e.preventDefault();
             if(scope.state == "login"){
                 clearInputs();
             };
             scope.state ='register'
+            scope.$apply()
             $("#login").addClass("hidden")
             $(".register-box").slideDown("slow")
             $("#back").show();
             $(this).val("Register").removeClass("leftButton").addClass('rightButton')
-            if($("input").length-3 === $("input.input-correct").length){
-                $("form#registerForm").submit();
+            if($("input").length-4 === $("input.input-correct").length){
+                $("form#loginForm").submit();
             }
+        }
+
+        loginButton = function(){
+            $("form#loginForm").submit();
         }
 
         backButton = function(){
             clearInputs();
             scope.state = 'login'
+            scope.$apply()
             $("#login").removeClass("hidden")
             $(".register-box").slideUp("slow")
             $("#back").hide().addClass("hidden");
             $("#register").val("No acount?").removeClass("rightButton").addClass('leftButton')
 
         };
-        loginButton =  function(){
-            console.log("ola")
-            $("form#loginForm").submit();
-        }
+
         checkLogin = function(){
             var
                 username = $("#username").val().replace(" ",''),
                 pw = $("#password").val().replace(" ",'')
-                ;
-            console.log(username)
-            console.log(pw)
+            ;
+
             if(username.length > 0 && pw.length > 0){
                 $("#login").removeAttr("disabled").removeClass('disabled')
             }
@@ -215,10 +220,11 @@ app.directive('loginWidget',function($rootScope,socket){
                 $("#login").attr("disabled",'disabled').addClass('disabled')
             }
         }
-        $("#login").on("click",loginButton)
         $("#username,#password").bind('blur',function(){checkLogin()});
         $("#back").on('click',backButton);
         $("#register").on('click',registerButton)
+        $("#login").on('click',loginButton)
+
 
     }
 

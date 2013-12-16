@@ -1,4 +1,4 @@
-app.controller('loginControl',['$scope','socket','$http', function($scope,socket,$http){
+app.controller('loginControl',['$scope','socket','$http','$window', function($scope,socket,$http,$window){
     $scope.state  = 'login';
     $scope.loginInput =
     {
@@ -69,9 +69,38 @@ app.controller('loginControl',['$scope','socket','$http', function($scope,socket
             url: '/',
             data: data,
             headers: {'Content-Type': 'application/x-www-form-urlencoded'}
-        });
+        }).
+            success(function(data, status, headers, config) {
+               $window.location = data
+                console.log(data)
+            });
 
     }
+
+
+}]);
+
+
+
+
+app.controller('lobbyControl',["$scope","socket",function($scope,socket){
+
+    $scope.rooms = []
+
+    socket.emit("create",{roomName:'boe'})
+
+    socket.on('lobbyCreated',  function(data){
+        $scope.rooms = []
+        for(var stuff in data){
+            if ($scope.rooms[stuff] !== data[stuff]){
+                $scope.rooms.push(data[stuff])
+            }
+        }
+        console.log($scope.rooms)
+    });
+    socket.on("lobbyRemoved",function(data){
+        $scope.rooms.remove(data)
+    })
 
 
 }]);

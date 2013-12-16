@@ -13,29 +13,44 @@ Chess = chess.Chess
 app = Flask(__name__)
 app.config.from_object('config')
 
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
-        state = request.form['type']
+        state = request.form['formState']
+        print "LOGIN FORM"
+        print "STATE = " + state
+        print '________________________________________'
+        for input in request.form:
+            print request.form[input]
+
+        username = request.form['username']
+        password = request.form['password']
+        repeat = request.form['passwordRepeat']
+        email = request.form['email']
         if state == 'login':
-            username = request.form['username']
-            password = request.form['password']
-            login(username, password)
-            return redirect(url_for('lobby'))
+            if login(username, password):
+                return redirect(url_for('lobby'))
+            else:
+                return render_template("login.html")
         elif state == 'register':
-            username = request.form['username']
-            password = request.form['password']
-            repeat = request.form['repeat']
-            email = request.form['email']
-            register(username, password, repeat, email)
+            print "boe"
+            if register(username, password, repeat, email):
+                return redirect(url_for('lobby'))
+            else:
+                return render_template('login.html')
     return render_template('login.html')
+
 
 @app.route('/lobby', methods=['GET', 'POST'])
 def lobby():
-    return render_template('chess.html')
+    if 'loggedIn' in session:
+        return render_template('lobby.html')
+    else:
+        return "you are not allowed to be here go away GROWL..."
 
 
-def login(user,pw):
+def login(user, pw):
     result = database.User.query.all()
     for u in result:
         if u.username.lower() == user.lower():
@@ -46,6 +61,10 @@ def login(user,pw):
                 session['username'] = u.username.lower()
                 print session['loggedIn']
                 print session['username']
+                return True
+    else:
+        return False
+
 
 def register(username, pw, repeat, email):
     if pw == repeat:
@@ -53,15 +72,17 @@ def register(username, pw, repeat, email):
         user = database.User(username, pw, email)
         database.db.session.add(user)
         database.db.session.commit()
+        return True
 
 
 @app.route("/socket.io/<path:path>")
 def run_socketio(path):
     socketio_manage(request.environ, {'': Chess})
+    return "oke"
 
 if __name__ == '__main__':
     port = 9000
-    print 'Listening on http://localhost:',port
+    print 'Listening on http://localhost:', port
     app.debug = True
     import os
     from werkzeug.wsgi import SharedDataMiddleware
