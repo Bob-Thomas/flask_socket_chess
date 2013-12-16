@@ -54,7 +54,6 @@ app.chessClient = function() {
         }
 
     },500)
-
     socket.on("check clients",function(data){
         var clients = data,
             color,

@@ -4,9 +4,11 @@ from socketio import socketio_manage
 from socketio.namespace import BaseNamespace
 from socketio.mixins import RoomsMixin, BroadcastMixin
 from flask.ext.sqlalchemy import SQLAlchemy
+import re
 import database
 
 # The socket.io namespace
+rooms = []
 
 class Chess(BaseNamespace, RoomsMixin, BroadcastMixin):
 
@@ -14,15 +16,24 @@ class Chess(BaseNamespace, RoomsMixin, BroadcastMixin):
         self.emit_to_room('main_room', 'move enemy', data)
         print "ALA AKBHAR"
 
-    def on_nickname(self, nickname):
-        self.emit('check clients', self.amount)
-        self.environ.setdefault('nicknames', []).append(nickname)
+    def on_join(self, nickname):
         self.socket.session['nickname'] = nickname
         self.broadcast_event('announcement', '%s has connected' % nickname)
-        self.broadcast_event('nicknames', self.environ['nicknames'])
         # Just have them join a default-named room
-        self.join('main_room')
+        self.join('lobby')
         print "connected"
+    def on_create(self, data):
+        print data
+        self.join(data['roomName'])
+        self.room = {
+            'name': data['roomName'],
+            'players': 1,
+            'inPlay': False
+
+        }
+        print rooms
+        rooms.append(self.room)
+        self.broadcast_event('lobbyCreated', rooms)
 
 
     def on_user_message(self, msg):
@@ -31,7 +42,7 @@ class Chess(BaseNamespace, RoomsMixin, BroadcastMixin):
     def recv_message(self, message):
         print "PING!!!", message
 
-    def on_verify(self,data):
+    def on_verify(self, data):
         if data.has_key('value'):
             print data['value']
             print "validating"
@@ -39,19 +50,23 @@ class Chess(BaseNamespace, RoomsMixin, BroadcastMixin):
             self.emit('validation', {'name':data['name'],'answer': checkUser(data['name'],data['value'], database.User,)})
 
 
-def checkUser(type,value, table):
+def checkUser(type ,value, table):
+    result = ''
     if not value:
         return True
     result = table.query.all()
     if type == 'username':
         for u in result:
-            if u.username == value:
+            if u.username.lower() == value.lower():
                 return True
-            else:
-                return False
+        else:
+            return False
     elif type == 'email':
-        for u in result:
-            if u.email == value:
-                return True
+        if re.match(r'^[_\.0-9a-zA-Z-+]+@([0-9a-zA-Z][0-9a-zA-Z-]+\.)+[a-zA-Z]{2,6}$', value):
+            for u in result:
+                if u.email.lower() == value.lower():
+                    return True
             else:
                 return False
+        else:
+            return 'invalid'

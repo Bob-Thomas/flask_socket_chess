@@ -161,8 +161,12 @@ input[type=submit]:hover{
     font-size:2em;
     margin-top:10px;
 }
-
-
+.ui.buttons .or:after{
+  height:1.66em;
+}
+.button_font{
+    font-size: 12px;
+}
 
 
 .connecting{

@@ -2,23 +2,24 @@
 <html>
 <head>
     <title></title>
-    <link rel="stylesheet" href="static/css/main.css">
+    <link href="http://semantic-ui.com/build/packaged/css/semantic.css" rel="stylesheet">
     <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+    <link rel="stylesheet" href="static/css/main.css">
     <script src="../static/js/vendor/angular.min.js"></script>
     <script type="text/javascript" src="static/socket.io.js"></script>
     <script src="static/js/sockets.js"></script>
 
 </head>
 <body ng-app="app">
-<div class="container">
+<div class="container" ng-controller="loginControl">
     <login-Widget>
         <div class="loader"><i class="fa fa-cog  fa-5x fa-spin"></i></div>
         <div  class="box login hidden"  >
             <div class="box-title">
             </div>
-            <form action='' method='post' >
+            <form id="loginForm" action="" method=post>
 
-                <div class="login-inputs" ng-controller="loginControl">
+            <div class="login-inputs" >
                     {% raw %}
                     <input type="text" id="username" name="username"   placeholder="Username" ng-model="username"  ng-blur='validateInput("username",username)' autocomplete="off" />
 
@@ -26,21 +27,25 @@
 
                     <div class="register-box">
 
-                        <input type="password"  id="password-repeat" ng-model="passwordRepeat"  name="password-repeat" ng-blur='validateInput("password-repeat",passwordRepeat)'  placeholder="repeat passsword"  />
+                        <input type="password"  id="passwordRepeat" ng-model="passwordRepeat"  name="passwordRepeat" ng-blur='validateInput("passwordRepeat",passwordRepeat)'  placeholder="repeat passsword"/>
 
 
-                        <input type="text"  id="email" name="email" placeholder="Email"  ng-model="email"  autocomplete="off" />
+                            <input type="text"  id="email" name="email" placeholder="Email"  ng-model="email"  ng-blur='validateInput("email",email)' autocomplete="off"  />
 
 
                     </div>
+                    <input type="hidden" name="formState" id="formState" ng-value="state"/>
+
                     <input type="submit"  class="leftButton hidden" id='back' name="back" value="Back"  />
 
-                    <input type="submit"  class="leftButton" id='register' name="register" value="No acount ?" />
+                    <input type="submit"   class="leftButton" id='register' name="register" value="No acount ?" />
 
-                    <input type="submit" class="rightButton "id='login' name="login" value="Login"/>
+                     <input type="submit"  class="rightButton"  id='login' name="login" value="Login"/>
+
                     {% endraw %}
                 </div>
             </form>
+
 
             <div class="box-footer">
 
@@ -48,15 +53,16 @@
         </div>
 
     </login-Widget>
+
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
     <script src="//code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
-
+    <script src="http://semantic-ui.com/build/packaged/javascript/semantic.js"></script>
     <!--<script src="static/js/loginScript.js"></script>-->
     <script src="static/js/angular/Module.js"></script>
-    <script src="static/js/angular/factory/loginFactory.js"></script>
+    <script src="static/js/angular/factory/socketFactory.js"></script>
     <script src="static/js/angular/directives/loginDirective.js"></script>
     <script src="static/js/angular/controllers/mainControl.js"></script>
 
-
 </body>
 </html>
+</main>
