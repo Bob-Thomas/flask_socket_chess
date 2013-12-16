@@ -5,11 +5,9 @@ from flask.ext.sqlalchemy import SQLAlchemy
 from socketio import socketio_manage
 from socketio.namespace import BaseNamespace
 from socketio.mixins import RoomsMixin, BroadcastMixin
-import sockets as chess
 import database
-
-Chess = chess.Chess
 # Flask routes
+
 app = Flask(__name__)
 app.config.from_object('config')
 
@@ -36,18 +34,24 @@ def index():
         elif state == 'register':
             print "boe"
             if register(username, password, repeat, email):
+                session['loggedIn'] = True
+                session['username'] = u.username.lower()
                 return redirect(url_for('lobby'))
             else:
                 return render_template('login.html')
     return render_template('login.html')
 
 
+
+
 @app.route('/lobby', methods=['GET', 'POST'])
 def lobby():
     if 'loggedIn' in session:
-        return render_template('lobby.html')
+        return render_template('lobby.html',user=session['username'])
     else:
         return "you are not allowed to be here go away GROWL..."
+
+
 
 
 def login(user, pw):
@@ -67,18 +71,30 @@ def login(user, pw):
 
 
 def register(username, pw, repeat, email):
+    result = database.User.query.all()
     if pw == repeat:
-        print username +" "+ pw+" "+repeat+" "+email
+        print username+" "+ pw+" "+repeat+" "+email
         user = database.User(username, pw, email)
         database.db.session.add(user)
         database.db.session.commit()
+        for u in result:
+            if u.username.lower() == user.lower():
+                print "found user"
+                print u.password
+                if u.password == pw:
+                    session['loggedIn'] = True
+                    session['username'] = u.username.lower()
+                    print session['loggedIn']
+                    print session['username']
+                    return True
         return True
 
 
 @app.route("/socket.io/<path:path>")
 def run_socketio(path):
-    socketio_manage(request.environ, {'': Chess})
-    return "oke"
+    import sockets
+    room = sockets.Room
+    socketio_manage(request.environ, {'': room})
 
 if __name__ == '__main__':
     port = 9000

@@ -85,10 +85,22 @@ app.controller('loginControl',['$scope','socket','$http','$window', function($sc
 
 app.controller('lobbyControl',["$scope","socket",function($scope,socket){
 
-    $scope.rooms = []
+    $scope.rooms = [];
+    $scope.messages = [];
+    $scope.user = '';
 
-    socket.emit("create",{roomName:'boe'})
-
+    socket.emit('enterLobby',$scope.userName);
+    socket.on('nickname',function(data){
+        $scope.user = data;
+    })
+    socket.on('message',function(data){
+        var message = {
+            name:data['name'],
+            time:data['time'],
+            message:data['message']
+        }
+        $scope.messages.push(message)
+    })
     socket.on('lobbyCreated',  function(data){
         $scope.rooms = []
         for(var stuff in data){
@@ -101,6 +113,11 @@ app.controller('lobbyControl',["$scope","socket",function($scope,socket){
     socket.on("lobbyRemoved",function(data){
         $scope.rooms.remove(data)
     })
+
+    $scope.createRoom = function(){
+        socket.emit("create",{roomName:$scope.roomName})
+
+    }
 
 
 }]);

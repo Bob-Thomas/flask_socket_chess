@@ -1,19 +1,36 @@
 <!DOCTYPE html>
 <html>
 <head>
+   <!-- <link href="/static/css/main.css" rel="stylesheet"> -->
     <link href="/static/css/semantic.min.css" rel="stylesheet">
     <script type="text/javascript" src="static/socket.io.js"></script>
     <title>Lobby</title>
 </head>
 <body ng-app="app">
 
+<input type="text" ng-init="userName = '{{user}}'" ng-model="userName" style="display:none" />
 <div class="ui three column grid" style="margin-top:200px" ng-controller="lobbyControl">
     <div class="top aligned row">
         <div class="column" >
-            <div class="ui vertical fluid menu">
+            <div class="ui vertical fluid menu" style="font-size:1em">
                 <div class="header item">
                     Chat
                 </div>
+                <div class="ui celled list" id="chat" style="height:490px;overflow:auto">
+                    {%raw%}
+                    <div class="item" ng-repeat="message in messages">
+                        <img class="ui avatar image" src="../img/chesspieces/bB.png">
+                        <div class="content">
+                            <div class="header">{{message['name']}}</div>
+                            <div class="item">{{message['time']}}</div>
+                            {{message['message']}}
+                        </div>
+                    </div>
+                </div>
+                {%endraw%}
+                <lobby-Chat>
+                <input type="text" name='chatInput' class="ui inverted input massive"/>
+                </lobby-Chat>
             </div>
         </div>
         <div class="column">
@@ -22,38 +39,65 @@
                     Rooms
                 </div>
                 <div class="item">
-                    <button class="ui center huge positive button">Create a game <i class="white play icon"></i></button>
+                    <button class="ui center huge positive button" ng-click="">Create a game <i class="white play icon"></i></button>
                 </div>
 
-            <div class="ui celled list" ng-repeat="room in rooms">
-                {%raw%}
-                <div class="item">
-                    <img class="ui avatar image" src="../img/chesspieces/bB.png">
-                    <div class="content">
-                        <div class="header">{{room['name']}}</div>
-                        {{room['players']}} t/m 2
+                <div class="ui celled list" style="overflow:auto;height:462px;">
+                    {%raw%}
+                    <div class="item" ng-repeat="room in rooms">
+                        <img class="ui avatar image" src="../img/chesspieces/bB.png">
+                        <div class="content">
+                            <div class="header" ng-bind="room['name']"></div>
+                            <div class="item" ng-bind="room['creator']"></div>
+                            {{room['players']}} t/m 2
+                        </div>
+                        <i class=" circular add icon" style="margin-top:19px;"></i>
                     </div>
                 </div>
-            </div>
                 {%endraw%}
-</div>
-</div>
-            <div class="column">
-                <div class="ui vertical fluid menu">
-                    <div class="header item">Account
-                    </div>
+            </div>
+        </div>
+        <div class="column">
+            <div class="ui vertical fluid menu">
+                <div class="header item">Account <h1 class="ui header">
+                    <img class="ui avatar image" src="../img/chesspieces/bB.png">{{user}}
+                </h1>
                 </div>
             </div>
         </div>
+    </div>
+    <div class="ui small modal">
+        <i class="close icon"></i>
+        <div class="content">
+            <div class="right">
+                <i class="huge user icon"></i>
+            </div>
+            <div class="left">
+                <div class="ui massive icon input">
+                    <input type="text" placeholder="Enter room name" ng-model="roomName">
+                </div>
+            </div>
+        </div>
+        <div class="actions">
+            <div class="ui button">Cancel</div>
+            <div class="ui button" ng-click="createRoom()">OK</div>
+        </div>
+    </div>
 
 
-
-        <script src="/static/js/vendor/angular.min.js"></script>
-        <script src="/static/js/vendor/jquery-1.10.2.min.js"></script>
-        <script src="/static/js/vendor/semantic.min.js"></script>
-        <script src="static/js/angular/Module.js"></script>
-        <script src="static/js/angular/factory/socketFactory.js"></script>
-        <script src="static/js/angular/directives/lobbyDirective.js"></script>
-        <script src="static/js/angular/controllers/mainControl.js"></script>
+    <script src="/static/js/vendor/angular.min.js"></script>
+    <script src="/static/js/vendor/jquery-1.10.2.min.js"></script>
+    <script src="/static/js/vendor/semantic.min.js"></script>
+    <script src="static/js/angular/Module.js"></script>
+    <script src="static/js/angular/factory/socketFactory.js"></script>
+    <script src="static/js/angular/directives/lobbyDirective.js"></script>
+    <script src="static/js/angular/controllers/mainControl.js"></script>
+    <script>
+        $('button').click(function(){
+            $('.ui.modal')
+                    .modal('show')
+            ;
+        });
+    </script>
 </body>
 </html>

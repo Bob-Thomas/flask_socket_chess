@@ -175,3 +175,6 @@ input[type=submit]:hover{
 .hidden{
     display:none;
 }
+.chat{
+    height:500px;
+}
