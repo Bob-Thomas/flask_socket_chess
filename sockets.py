@@ -57,6 +57,20 @@ class Room(BaseNamespace, RoomsMixin, BroadcastMixin):
             print checkUser(data['name'],data['value'], database.User,)
             self.emit('validation', {'name':data['name'],'answer': checkUser(data['name'],data['value'], database.User,)})
 
+    def recv_disconnect(self):
+        # Remove nickname from the list.
+        nickname = self.session['nickname']
+        for item in rooms:
+            if item['creator'] == nickname:
+                rooms.remove(item)
+        self.nicknames.remove(nickname)
+        self.broadcast_event('announcement', '%s has disconnected' % nickname)
+        self.broadcast_event('nicknames', self.nicknames)
+        self.disconnect(silent=True)
+        self.broadcast_event('lobbyCreated', rooms)
+        return True
+
+
 
 def checkUser(type ,value, table):
     result = ''

@@ -78,7 +78,7 @@ def register(username, pw, repeat, email):
         database.db.session.add(user)
         database.db.session.commit()
         for u in result:
-            if u.username.lower() == user.lower():
+            if u.username.lower() == username.lower():
                 print "found user"
                 print u.password
                 if u.password == pw:
