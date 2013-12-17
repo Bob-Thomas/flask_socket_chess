@@ -7,6 +7,7 @@ from socketio.mixins import RoomsMixin, BroadcastMixin
 from flask.ext.sqlalchemy import SQLAlchemy
 from chess import app
 import re
+from datetime import datetime
 import database
 # The socket.io namespace
 rooms = []
@@ -18,13 +19,27 @@ class Room(BaseNamespace, RoomsMixin, BroadcastMixin):
         self.emit_to_room('main_room', 'move enemy', data)
         print "ALA AKBHAR"
 
+    def on_joinGame(self,data):
+        self.join(data['room'])
+
     def on_enterLobby(self, data):
         self.socket.session['nickname'] = data
         print self.socket.session['nickname']
-        self.broadcast_event('announcement', '%s has connected' % self.socket.session['nickname'])
+        m = datetime.now().minute
+        h = datetime.now().hour
+        message = {
+            'rank':'bK',
+            'name':"ALL MIGHTY SEVER",
+            'time':str(h)+":"+str(m),
+            'message':'%s has connected' % self.socket.session['nickname']
+        }
+        self.broadcast_event('message', message)
         # Just have them join a default-named room
         self.join('lobby')
-        self.emit('nickname', self.socket.session['nickname'])
+        self.emit('nickname', {
+            'name':self.socket.session['nickname'],
+            'rank':getUserRank(self.socket.session['nickname'])
+        })
         self.broadcast_event('lobbyCreated', rooms)
         print "connected"
 
@@ -32,6 +47,7 @@ class Room(BaseNamespace, RoomsMixin, BroadcastMixin):
         print data
         self.join(data['roomName'])
         self.room = {
+            'creatorRank':getUserRank(self.socket.session['nickname']),
             'creator':self.socket.session['nickname'],
             'name': data['roomName'],
             'players': 1,
@@ -41,7 +57,6 @@ class Room(BaseNamespace, RoomsMixin, BroadcastMixin):
         print rooms
         rooms.append(self.room)
         self.broadcast_event('lobbyCreated', rooms)
-
 
     def on_sendMessage(self, msg):
         print "boe"
@@ -56,6 +71,27 @@ class Room(BaseNamespace, RoomsMixin, BroadcastMixin):
             print "validating"
             print checkUser(data['name'],data['value'], database.User,)
             self.emit('validation', {'name':data['name'],'answer': checkUser(data['name'],data['value'], database.User,)})
+
+    def recv_disconnect(self):
+        # Remove nickname from the list
+        if 'nickname' in self.socket.session:
+            nickname = self.socket.session['nickname']
+            m = datetime.now().minute
+            h = datetime.now().hour
+            for item in rooms:
+                if item['creator'] == nickname:
+                    rooms.remove(item)
+            message = {
+                'rank':'bK',
+                'name':"ALL MIGHTY SEVER",
+                'time':str(h)+":"+str(m),
+                'message':'%s has disconnected' % nickname
+            }
+            self.broadcast_event('message', message)
+            self.disconnect(silent=True)
+            self.broadcast_event('lobbyCreated', rooms)
+        return True
+
 
 
 def checkUser(type ,value, table):
@@ -79,3 +115,10 @@ def checkUser(type ,value, table):
         else:
             return 'invalid'
 
+def getUserRank(user):
+    result = database.User.query.all()
+    avatar = ''
+    for u in result:
+        if u.username.lower() == user:
+            avatar = u.color+u.rank.title()
+    return avatar

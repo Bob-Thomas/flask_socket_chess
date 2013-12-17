@@ -21,6 +21,8 @@ class ChatNamespace(BaseNamespace, RoomsMixin, BroadcastMixin):
     def recv_message(self, message):
         print "PING!!!", message
 
+
+
    
 # Flask routes
 app = Flask(__name__)

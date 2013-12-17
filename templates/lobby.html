@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-   <!-- <link href="/static/css/main.css" rel="stylesheet"> -->
     <link href="/static/css/semantic.min.css" rel="stylesheet">
+    <link href="/static/css/lobby.css" rel="stylesheet">
     <script type="text/javascript" src="static/socket.io.js"></script>
     <title>Lobby</title>
 </head>
@@ -11,41 +11,45 @@
 <input type="text" ng-init="userName = '{{user}}'" ng-model="userName" style="display:none" />
 <div class="ui three column grid" style="margin-top:200px" ng-controller="lobbyControl">
     <div class="top aligned row">
-        <div class="column" >
+        <div class="column lobby-boxes" >
             <div class="ui vertical fluid menu" style="font-size:1em">
                 <div class="header item">
                     Chat
                 </div>
-                <div class="ui celled list" id="chat" style="height:490px;overflow:auto">
+                <div scroll-Div class="ui celled list chatBox" id="chat">
                     {%raw%}
-                    <div class="item" ng-repeat="message in messages">
-                        <img class="ui avatar image" src="../img/chesspieces/bB.png">
+                    <div class="item"  ng-repeat="message in messages">
+                        <img class="ui avatar image" ng-src="../img/chesspieces/{{message['rank']}}.png">
                         <div class="content">
                             <div class="header">{{message['name']}}</div>
                             <div class="item">{{message['time']}}</div>
-                            {{message['message']}}
+                            <div>{{message['message']}}</div>
                         </div>
                     </div>
                 </div>
                 {%endraw%}
                 <lobby-Chat>
-                <input type="text" name='chatInput' class="ui inverted input massive"/>
+                    <input type="text" name='chatInput' placeholder="Enter your message" class="ui inverted input massive chatInput"/>
                 </lobby-Chat>
             </div>
         </div>
-        <div class="column">
+        <div class="column lobby-boxes">
             <div class="ui vertical fluid menu" style="font-size:1.2em;">
+                <i class="scrollUp huge red angle up icon"></i>
+
                 <div class="header item">
                     Rooms
                 </div>
+
                 <div class="item">
-                    <button class="ui center huge positive button" ng-click="">Create a game <i class="white play icon"></i></button>
+                    <button class="ui center huge positive button" style="width: 100%;">Create a game <i class="white play icon"></i></button>
                 </div>
 
-                <div class="ui celled list" style="overflow:auto;height:462px;">
+                <div scroll-Div id="rooms" class="ui celled list chatBox">
                     {%raw%}
-                    <div class="item" ng-repeat="room in rooms">
-                        <img class="ui avatar image" src="../img/chesspieces/bB.png">
+
+                    <div room-items class="item" ng-repeat="room in rooms">
+                        <img class="ui avatar image" ng-src="../img/chesspieces/{{room['creatorRank']}}.png">
                         <div class="content">
                             <div class="header" ng-bind="room['name']"></div>
                             <div class="item" ng-bind="room['creator']"></div>
@@ -54,13 +58,14 @@
                         <i class=" circular add icon" style="margin-top:19px;"></i>
                     </div>
                 </div>
+                <i class="scrollUp red huge angle down icon"></i>
                 {%endraw%}
             </div>
         </div>
-        <div class="column">
+        <div class="column lobby-boxes">
             <div class="ui vertical fluid menu">
                 <div class="header item">Account <h1 class="ui header">
-                    <img class="ui avatar image" src="../img/chesspieces/bB.png">{{user}}
+                    <img class="ui avatar image" src="../img/chesspieces/{{avatar}}.png">{{user}}
                 </h1>
                 </div>
             </div>
@@ -87,6 +92,7 @@
 
     <script src="/static/js/vendor/angular.min.js"></script>
     <script src="/static/js/vendor/jquery-1.10.2.min.js"></script>
+    <script src="/static/js/vendor/scrollPlugin.js"></script>
     <script src="/static/js/vendor/semantic.min.js"></script>
     <script src="static/js/angular/Module.js"></script>
     <script src="static/js/angular/factory/socketFactory.js"></script>

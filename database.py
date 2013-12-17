@@ -12,12 +12,20 @@ class User(db.Model):
     username = db.Column(db.String(80))
     email = db.Column(db.String(120))
     password = db.Column(db.String(80))
+    loses = db.Column(db.Integer)
+    wins = db.Column(db.Integer)
+    rank = db.Column(db.String(1))
+    color = db.Column(db.String(1))
 
 
     def __init__(self, username, password, email):
         self.username = username
         self.password = password
         self.email = email
+        self.wins = 0
+        self.loses = 0
+        self.rank = 'p'
+        self.color = 'b'
 
         def __repr__(self):
             return '<User %r>' % self.username

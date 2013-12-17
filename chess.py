@@ -35,7 +35,7 @@ def index():
             print "boe"
             if register(username, password, repeat, email):
                 session['loggedIn'] = True
-                session['username'] = u.username.lower()
+                session['username'] = username.lower()
                 return redirect(url_for('lobby'))
             else:
                 return render_template('login.html')
@@ -47,11 +47,18 @@ def index():
 @app.route('/lobby', methods=['GET', 'POST'])
 def lobby():
     if 'loggedIn' in session:
-        return render_template('lobby.html',user=session['username'])
+        result = database.User.query.all()
+        avatar = ''
+        for u in result:
+            if u.username.lower() == session['username'].lower():
+                avatar = u.color+u.rank.title()
+        return render_template('lobby.html',user=session['username'],avatar=avatar)
     else:
         return "you are not allowed to be here go away GROWL..."
 
-
+@app.route('/game', methods=['GET','POST'])
+def game():
+    return render_template('chess.html')
 
 
 def login(user, pw):
@@ -77,16 +84,6 @@ def register(username, pw, repeat, email):
         user = database.User(username, pw, email)
         database.db.session.add(user)
         database.db.session.commit()
-        for u in result:
-            if u.username.lower() == user.lower():
-                print "found user"
-                print u.password
-                if u.password == pw:
-                    session['loggedIn'] = True
-                    session['username'] = u.username.lower()
-                    print session['loggedIn']
-                    print session['username']
-                    return True
         return True
 
 

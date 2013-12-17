@@ -88,18 +88,21 @@ app.controller('lobbyControl',["$scope","socket",function($scope,socket){
     $scope.rooms = [];
     $scope.messages = [];
     $scope.user = '';
-
+    $scope.userRank = ''
     socket.emit('enterLobby',$scope.userName);
     socket.on('nickname',function(data){
-        $scope.user = data;
+        $scope.user = data['name'];
+        $scope.userRank = data['rank']
     })
     socket.on('message',function(data){
         var message = {
+            rank:data['rank'],
             name:data['name'],
             time:data['time'],
             message:data['message']
         }
         $scope.messages.push(message)
+
     })
     socket.on('lobbyCreated',  function(data){
         $scope.rooms = []

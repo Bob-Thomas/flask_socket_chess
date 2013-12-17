@@ -1,0 +1,25 @@
+body{
+    background-size:150%;
+    background-repeat: no-repeat;
+    background-image: url('../img/bg.jpg');
+}
+input[type='text']{
+    text-align: center;
+    width:100%;
+    border:none;
+    border-top:2px solid black;
+}
+
+.lobby-boxes{
+    height:500px;
+}
+.chatBox{
+    height:514px;
+    overflow:hidden;
+}
+
+.scrollUp{
+    position:absolute;
+    left:48%;
+    margin-top: -24px !important;
+}
