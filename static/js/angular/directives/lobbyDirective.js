@@ -39,7 +39,7 @@ app.directive('lobbyChat',function($rootScope,socket){
 
 });
 
-app.directive('roomItems',function($rootScope,socket){
+app.directive('hoverItems',function($rootScope,socket){
     var
         linkFn,
         restrict = 'A'
@@ -48,14 +48,19 @@ app.directive('roomItems',function($rootScope,socket){
 
     linkFn = function(scope,element,attrs){
         var itemHover,
-            itemLeave;
+            itemLeave,
+            startingColor = element.css("background-color");
+        console.log(startingColor)
+        console.log(element);
 
         itemHover = function(element){
-            element.css({'backgroundColor':'RGBA(0,0,0,0.2)'})
-        }
+            element.css({'backgroundColor': attrs.hovercolor})
+        };
+
         itemLeave = function(element){
-            element.css({'backgroundColor':'white'})
-        }
+            element.css({'backgroundColor':startingColor})
+        };
+
         element.on('mouseenter',function(){itemHover(element)}   )
         element.on('mouseleave',function(){itemLeave(element)}   )
 
@@ -64,6 +69,10 @@ app.directive('roomItems',function($rootScope,socket){
 
     return{
         restrict:restrict,
+        scope: {
+            hovercolor: "@",
+            leavecolor: "@"
+        },
         link:linkFn
     }
 

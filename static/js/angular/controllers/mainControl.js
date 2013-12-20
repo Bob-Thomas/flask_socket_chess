@@ -89,11 +89,15 @@ app.controller('lobbyControl',["$scope","socket",function($scope,socket){
     $scope.messages = [];
     $scope.user = '';
     $scope.userRank = ''
+
+
     socket.emit('enterLobby',$scope.userName);
+
     socket.on('nickname',function(data){
         $scope.user = data['name'];
         $scope.userRank = data['rank']
     })
+
     socket.on('message',function(data){
         var message = {
             rank:data['rank'],
@@ -104,6 +108,7 @@ app.controller('lobbyControl',["$scope","socket",function($scope,socket){
         $scope.messages.push(message)
 
     })
+
     socket.on('lobbyCreated',  function(data){
         $scope.rooms = []
         for(var stuff in data){
@@ -113,6 +118,7 @@ app.controller('lobbyControl',["$scope","socket",function($scope,socket){
         }
         console.log($scope.rooms)
     });
+
     socket.on("lobbyRemoved",function(data){
         $scope.rooms.remove(data)
     })
@@ -121,6 +127,8 @@ app.controller('lobbyControl',["$scope","socket",function($scope,socket){
         socket.emit("create",{roomName:$scope.roomName})
 
     }
+
+
 
 
 }]);
