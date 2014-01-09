@@ -3,11 +3,9 @@ app.Piece = function Piece(position, type, id,color){
     this.type = type;
     this.id = id;
     this.color = color;
+    this.alive = true;
 };
 //app.Piece.prototype.color = function(color){this.color=color};
-app.Piece.prototype.setType = function(type){
-    this.type = type
-};
 app.Piece.prototype.setPosition = function(position){
     this.position = position
 };
@@ -34,6 +32,12 @@ app.Piece.prototype.inBounds = function (position){
 };
 app.Piece.prototype.draw = function(){
     return this.type
+}
+app.Piece.prototype.setAlive = function(alive){
+    this.alive = alive;
+}
+app.Piece.prototype.getAlive = function(){
+    return this.alive
 }
 
 app.Pawn = function Pawn(){

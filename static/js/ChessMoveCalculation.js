@@ -6,27 +6,49 @@ app.MoveValidation.prototype.Lightpath = function LightPath(tiles,piece,canJump)
     var tileList,
         tile,
         tileItem,
-        color;
-    app.UpdateTiles();
+        color,
+        ctx = app.init.ctx;
+    //app.UpdateTiles();
     for(tileList = 0; tileList < tiles.length; tileList++){
         for(tile = 0; tile < tiles[tileList].length; tile++){
             if(tiles[tileList][tile][0]+65 >= 65){
-                tileItem = ".tile-"+String.fromCharCode(65+tiles[tileList][tile][0])+tiles[tileList][tile][1]
-                if($(tileItem).hasClass("occupied-tile")){
-                    color = $(tileItem).children('img').attr("data-piece")[0];
-                }
-                if($(tileItem).hasClass("free-tile")){
+                tileItem = [tiles[tileList][tile][0],tiles[tileList][tile][1]]
+                if(app.pieceClicked(tileItem,"check") === "empty"){
 
-                    $(tileItem).prepend("<div class='overlayTile'></div>")
+//                    $(tileItem).prepend("<div class='overlayTile'></div>")
+                    console.log("path lighted BLUE")
+                    ctx.beginPath();
+                    ctx.rect(tileItem[1]*75,tileItem[0]*75,75,75);
+                    ctx.globalAlpha = 0.5;
+                    ctx.fillStyle = 'blue';
+                    ctx.fill();
+                    ctx.stroke();
+                    ctx.restore();
                 }
-                else if($(tileItem).hasClass("occupied-tile") && color === piece.getColor() ){
-                    $(tileItem).prepend("<div style='position:absolute' class='overlayTile friendly'></div>")
+                else if(app.pieceClicked(tileItem,"check") === "player"){
+//                    $(tileItem).prepend("<div style='position:absolute' class='overlayTile friendly'></div>")
+                    console.log("path lighted GREEN")
+                    ctx.beginPath();
+                    ctx.rect(tileItem[1]*75,tileItem[0]*75,75,75);
+                    ctx.globalAlpha = 0.5;
+                    ctx.fillStyle = 'green';
+                    ctx.fill();
+                    ctx.stroke();
+                    ctx.restore();
                     if(canJump === false){
                         break;
                     }
                 }
-                else if($(tileItem).hasClass("occupied-tile") && color !== piece.getColor() ){
-                    $(tileItem).prepend("<div style='position:absolute' class='overlayTile blocked'></div>")
+                if(app.pieceClicked(tileItem,"check") === "enemy"){
+//                    $(tileItem).prepend("<div style='position:absolute' class='overlayTile blocked'></div>")
+                    console.log("path lighted RED")
+                    ctx.beginPath();
+                    ctx.rect(tileItem[1]*75,tileItem[0]*75,75,75);
+                    ctx.globalAlpha = 0.5;
+                    ctx.fillStyle = 'red';
+                    ctx.fill();
+                    ctx.stroke();
+                    ctx.restore();
                     if(canJump === false){
                         break;
                     }
@@ -68,11 +90,11 @@ app.MoveValidation.prototype.Lightpath = function LightPath(tiles,piece,canJump)
 
 }
 app.MoveValidation.prototype.ClearPath = function ClearPath(){
-    $(".overlayTile").remove();
+    app.render()
 }
 app.MoveValidation.prototype.CheckStrikeAble =  function CheckStrikeAble(strikeCoords,piece,canJump,direction){
     var strikeTile,checks,color,list;
-    app.UpdateTiles();
+    //app.UpdateTiles();
     for(list = 0; list < strikeCoords.length; list++) {
         for(checks = 0; checks < strikeCoords[list].length; checks++)
             if(65+strikeCoords[list][checks][0] >= 65){
@@ -127,13 +149,13 @@ app.ValidatePawn = function ValidatePawn(){
         strikeCoords.push( [ [ coord[0]-1,(coord[1]+1)],[coord[0]-1,(coord[1]-1) ] ] )
 
         for(steps = 0; steps < maxSteps; steps+=1){
-            tiles.push([ position[0]-1+ -steps,position[1] ])
+            tiles.push([ (position[0]-1)-steps,position[1] ])
 
         }
         list.push(tiles)
-        app.MoveValidation.prototype.CheckStrikeAble(strikeCoords,this.piece,false,'diagonal')
+       // app.MoveValidation.prototype.CheckStrikeAble(strikeCoords,this.piece,false,'diagonal')
         app.MoveValidation.prototype.Lightpath(list,this.piece,false)
-        app.MoveValidation.prototype.ClickPath(this.piece);
+        //app.MoveValidation.prototype.ClickPath(this.piece);
 
     };
 
@@ -177,11 +199,11 @@ app.ValidateRook = function ValidateRook(){
     list.push(down);
     list.push(left);
     list.push(right);
-    app.MoveValidation.prototype.CheckStrikeAble(list,this.piece,false,"axes")
+    ///app.MoveValidation.prototype.CheckStrikeAble(list,this.piece,false,"axes")
 
     app.MoveValidation.prototype.Lightpath(list,this.piece,false)
 
-    app.MoveValidation.prototype.ClickPath(this.piece);
+    ///app.MoveValidation.prototype.ClickPath(this.piece);
 
 }
 
@@ -222,11 +244,11 @@ app.ValidateBishop = function ValidateBishop(){
     list.push(upLeft);
     list.push(downRight);
     list.push(downLeft);
-    app.MoveValidation.prototype.CheckStrikeAble(list,this.piece,false,"diagonal")
+    //app.MoveValidation.prototype.CheckStrikeAble(list,this.piece,false,"diagonal")
 
     app.MoveValidation.prototype.Lightpath(list,this.piece,false)
 
-    app.MoveValidation.prototype.ClickPath(this.piece);
+    //app.MoveValidation.prototype.ClickPath(this.piece);
 
 }
 
@@ -298,11 +320,11 @@ app.ValidateQueen = function ValidateQueen(){
     list.push(upLeft);
     list.push(downRight);
     list.push(downLeft);
-    app.MoveValidation.prototype.CheckStrikeAble(list,this.piece,false,"axes")
+    //app.MoveValidation.prototype.CheckStrikeAble(list,this.piece,false,"axes")
 
     app.MoveValidation.prototype.Lightpath(list,this.piece,false)
 
-    app.MoveValidation.prototype.ClickPath(this.piece);
+    //app.MoveValidation.prototype.ClickPath(this.piece);
 
 }
 
@@ -342,9 +364,9 @@ app.ValidateKing = function ValidateKing(){
     list.push(upLeft);
     list.push(downRight);
     list.push(downLeft);
-    app.MoveValidation.prototype.CheckStrikeAble(list,this.piece,false,'axes')
+    //app.MoveValidation.prototype.CheckStrikeAble(list,this.piece,false,'axes')
     app.MoveValidation.prototype.Lightpath(list,this.piece,false)
-    app.MoveValidation.prototype.ClickPath(this.piece);
+   // app.MoveValidation.prototype.ClickPath(this.piece);
 
 
 }
@@ -375,9 +397,10 @@ app.ValidateKnight = function ValidateKnight(){
     list.push(left);
     list.push(right);
     console.log(list)
-    app.MoveValidation.prototype.CheckStrikeAble(list,this.piece,true,'axes')
+    //app.MoveValidation.prototype.CheckStrikeAble(list,this.piece,true,'axes')
     app.MoveValidation.prototype.Lightpath(list,this.piece,true)
-    app.MoveValidation.prototype.ClickPath(this.piece);
+    //app.MoveValidation.prototype.ClickPath(this.piece);
+    //app.MoveValidation.prototype.ClickPath(this.piece);
 
 
 }

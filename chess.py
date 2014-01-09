@@ -58,7 +58,7 @@ def lobby():
 
 @app.route('/game', methods=['GET','POST'])
 def game():
-    return render_template('chess.html')
+    return render_template('game.html')
 
 
 def login(user, pw):

@@ -18,12 +18,12 @@
                 </div>
                 <div scroll-Div class="ui celled list chatBox" id="chat">
                     {%raw%}
-                    <div class="item"  ng-repeat="message in messages">
+                    <div hover-items hovercolor="rgba(0,0,0,0.2)" class="item"  ng-repeat="message in messages">
                         <img class="ui avatar image" ng-src="../img/chesspieces/{{message['rank']}}.png">
                         <div class="content">
-                            <div class="header">{{message['name']}}</div>
-                            <div class="item">{{message['time']}}</div>
-                            <div>{{message['message']}}</div>
+                            <div class="header" ng-bind="message['name']"></div>
+                            <div class="item" ng-bind="message['time']"></div>
+                            <div ng-bind="message['message']"></div>
                         </div>
                     </div>
                 </div>
@@ -35,7 +35,6 @@
         </div>
         <div class="column lobby-boxes">
             <div class="ui vertical fluid menu" style="font-size:1.2em;">
-                <i class="scrollUp huge red angle up icon"></i>
 
                 <div class="header item">
                     Rooms
@@ -45,20 +44,19 @@
                     <button class="ui center huge positive button" style="width: 100%;">Create a game <i class="white play icon"></i></button>
                 </div>
 
-                <div scroll-Div id="rooms" class="ui celled list chatBox">
+                <div scroll-Div id="rooms" class="ui celled list roomBox">
                     {%raw%}
 
-                    <div room-items class="item" ng-repeat="room in rooms">
+                    <div room-items hover-items hovercolor="rgba(0,0,0,0.2)" class="item" ng-repeat="room in rooms">
                         <img class="ui avatar image" ng-src="../img/chesspieces/{{room['creatorRank']}}.png">
                         <div class="content">
                             <div class="header" ng-bind="room['name']"></div>
                             <div class="item" ng-bind="room['creator']"></div>
-                            {{room['players']}} t/m 2
+                            <div ng-bind="room['players']+'/2'"></div>
                         </div>
-                        <i class=" circular add icon" style="margin-top:19px;"></i>
+                        <i class=" circular add icon joinGame" style="margin-top:19px;"></i>
                     </div>
                 </div>
-                <i class="scrollUp red huge angle down icon"></i>
                 {%endraw%}
             </div>
         </div>
