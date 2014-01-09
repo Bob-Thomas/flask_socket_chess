@@ -1,5 +1,6 @@
-app.MoveValidation = function MoveValidation(piece){
+app.MoveValidation = function MoveValidation(piece,clickPosition){
     this.piece = piece;
+    this.clickPosition = clickPosition;
 };
 
 app.MoveValidation.prototype.Lightpath = function LightPath(tiles,piece,canJump){
@@ -59,33 +60,93 @@ app.MoveValidation.prototype.Lightpath = function LightPath(tiles,piece,canJump)
         }
     }
 
-    app.MoveValidation.prototype.ClickPath = function ClickPath(piece){
-        $(".overlayTile").each(function(){
+    app.MoveValidation.prototype.ClickPath = function ClickPath(piece,steps,clickedPos){
+        var tileList,
+            tile,
+            tileItem,
+            list,
+            checks
+            color,
+            tiles,
+            ctx = app.init.ctx
+            ;
+        var strikeCoords;
+        tiles = steps.move;
+        strikeCoords = steps.strike;
+        if(piece){
+            console.log(piece)
+            for(tileList = 0; tileList < tiles.length; tileList++){
+                for(tile = 0; tile < tiles[tileList].length; tile++){
+                    if(tiles[tileList][tile][0]+65 >= 65){
+                        tileItem = [tiles[tileList][tile][0],tiles[tileList][tile][1]]
+                        if(clickedPos[0] === tileItem[0] && clickedPos[1] === tileItem[1] && app.pieceClicked(tileItem,'checks') == 'empty' ){
+                            app.selectedPiece = null;
+                            piece.setPosition(tileItem)
+                            socket.emit('turnOver',app.turn)
+                            socket.emit('movePiece',{
+                                    move:tileItem,
+                                    player:piece.getId()}
+                            )
+                            app.turn = app.enemy
+                            if(piece.getType()[1] == "P"){
+                            if(tileItem[0] == 0){
+                                piece.promote()
+                            }
+                            piece.enpasent = false;
+                            }
+                            app.render()
+                        }
 
-            $(this).click(function(){
-                if(!$(this).hasClass("blocked")){
-                    var
-                        positionList = $(this).parent().attr("class").split(' '),
-                        position = app.helper.CheckList(positionList,/^tile-../),
-                        y = position.replace("tile-","").charCodeAt(position[0])-65,
-                        x = position.replace("tile-","")[1];
-                    if(!$(this).hasClass("strikeAble")&& !$(this).hasClass("friendly") ){
-                        app.MovePiece(piece,[y,x],true)
-                        piece.enpasent = false;
-                        app.MoveValidation.prototype.ClearPath()
-                    }
-                    else if($(this).hasClass('strikeAble')){
-
-                        app.StrikePiece([y,x],true)
-                        app.MovePiece(piece,[y,x],true)
-                        app.MoveValidation.prototype.ClearPath()
-                    }
-                    else if($(this).hasClass("friendly")){
-                        app.MoveValidation.prototype.ClearPath();
                     }
                 }
-            });
-        });
+            }
+            for(list = 0; list < strikeCoords.length; list++) {
+                for(checks = 0; checks < strikeCoords[list].length; checks++)
+                    if(65+strikeCoords[list][checks][0] >= 65){
+                        tileItem = [strikeCoords[list][checks][0],strikeCoords[list][checks][1]]
+                        if(clickedPos[0] === tileItem[0] && clickedPos[1] === tileItem[1] && app.pieceClicked(tileItem,'checks') == 'enemy' ){
+                            for(var object in app.pieceSet[app.enemy]){
+                               var enemyPiece = app.pieceSet[app.enemy][object]
+                               var
+                                   enemyX = enemyPiece.getposition()[1],
+                                   enemyY = enemyPiece.getposition()[0]
+                               ;
+                               if(clickedPos[1] == enemyX && clickedPos[0] == enemyY){
+                                   enemyPiece.setAlive(false)
+                                   enemyPiece.setPosition([-1,-1])
+                                   piece.setPosition(tileItem)
+                                   socket.emit('strikePiece',{
+                                       enemy:enemyPiece.getId(),
+                                       move:tileItem,
+                                       player:piece.getId()
+                                       }
+                                   )
+                                   app.turn = app.enemy
+                                   socket.emit('turnOver',app.turn)
+                                   if(piece.getType()[1] == 'P'){
+                                   if(tileItem[0] == 0){
+                                       piece.promote()
+                                   }
+                                   piece.enpasent = false;
+                               }
+                                   if(enemyPiece.getType()[1] == 'K'){
+                                       socket.emit("gameover",app.team)
+                                       app.startingPositions()
+                                   }
+                                   app.render()
+                                   app.selectedPiece = undefined
+                               }
+
+                            }
+
+                        }
+                    }
+            }
+
+
+
+
+        }
     }
 
 }
@@ -93,25 +154,40 @@ app.MoveValidation.prototype.ClearPath = function ClearPath(){
     app.render()
 }
 app.MoveValidation.prototype.CheckStrikeAble =  function CheckStrikeAble(strikeCoords,piece,canJump,direction){
-    var strikeTile,checks,color,list;
+    var
+        tileItem,
+        checks,
+        color,
+        list,
+        ctx = app.init.ctx
+        ;
     //app.UpdateTiles();
     for(list = 0; list < strikeCoords.length; list++) {
         for(checks = 0; checks < strikeCoords[list].length; checks++)
             if(65+strikeCoords[list][checks][0] >= 65){
-                strikeTile = ".tile-"+String.fromCharCode(65+strikeCoords[list][checks][0])+strikeCoords[list][checks][1]
-                color =  $(strikeTile).children('img').attr("data-piece");
-                if(color !== undefined){
-                    color = color[0]
-                }
-                if($(strikeTile).hasClass("occupied-tile") && color === piece.getColor() ){
-                    $(strikeTile).prepend("<div style='position:absolute' class='overlayTile friendly'></div>")
+                tileItem = [strikeCoords[list][checks][0],strikeCoords[list][checks][1]]
+                if(app.pieceClicked(tileItem,"check") === "player"){
+
+                    ctx.beginPath();
+                    ctx.rect(tileItem[1]*75,tileItem[0]*75,75,75);
+                    ctx.globalAlpha = 0.5;
+                    ctx.fillStyle = 'green';
+                    ctx.fill();
+                    ctx.stroke();
+                    ctx.restore();
                     if(canJump === false && direction === "axes"){
                         break;
                     }
 
                 }
-                else if($(strikeTile).hasClass("occupied-tile") && color !== piece.getColor() ){
-                    $(strikeTile).prepend("<div style='position:absolute' class='overlayTile strikeAble'></div>")
+                else if(app.pieceClicked(tileItem,"check") === "enemy"){
+                    ctx.beginPath();
+                    ctx.rect(tileItem[1]*75,tileItem[0]*75,75,75);
+                    ctx.globalAlpha = 0.5;
+                    ctx.fillStyle = 'orange';
+                    ctx.fill();
+                    ctx.stroke();
+                    ctx.restore();
                     if(canJump === false && direction === "axes"){
                         break;
                     }
@@ -153,9 +229,18 @@ app.ValidatePawn = function ValidatePawn(){
 
         }
         list.push(tiles)
-       // app.MoveValidation.prototype.CheckStrikeAble(strikeCoords,this.piece,false,'diagonal')
-        app.MoveValidation.prototype.Lightpath(list,this.piece,false)
-        //app.MoveValidation.prototype.ClickPath(this.piece);
+        if(arguments.length == 1){
+            app.MoveValidation.prototype.Lightpath(list,this.piece,false)
+            app.MoveValidation.prototype.CheckStrikeAble(strikeCoords,this.piece,false,'diagonal')
+
+        }
+
+        return {
+            tiles:{
+                move:list,
+                strike:strikeCoords
+            }
+        }
 
     };
 
@@ -175,22 +260,58 @@ app.ValidateRook = function ValidateRook(){
         up = [],
         down = [],
         left = [],
-        right = [];
+        right = [],
+        nextPosition;
     position = this.piece.position;
     y = parseInt(position[0]);
     x = parseInt(position[1]);
+
     for(u = y; u > 0; u-=1){
-        up.push([ u-1,position[1] ])
+        nextPosition = [ u-1,position[1] ];
+        if(app.pieceClicked(nextPosition,'checks') == "empty" ){
+            up.push(nextPosition)
+        }else if(app.pieceClicked(nextPosition,'checks') == "enemy" || app.pieceClicked(nextPosition,'checks') == "player"){
+            up.push(nextPosition)
+            console.log('breaku des')
+            break;
+
+        }
+
     }
     for(d = y; d <= 7; d+=1 )  {
-        down.push([ d+1,position[1] ])
+        nextPosition = [ d+1,position[1] ]
+        if(app.pieceClicked(nextPosition,'checks') == "empty" ){
+            down.push(nextPosition)
+        }else if(app.pieceClicked(nextPosition,'checks') == "enemy" || app.pieceClicked(nextPosition,'checks') == "player"){
+            down.push(nextPosition)
+            console.log('breaku des')
+            break;
+
+        }
     }
 
     for(l = x; l > 0; l-=1){
-        left.push([position[0],l-1 ])
+        nextPosition = [position[0],l-1 ]
+        if(app.pieceClicked(nextPosition,'checks') == "empty" ){
+            left.push(nextPosition)
+        }else if(app.pieceClicked(nextPosition,'checks') == "enemy" || app.pieceClicked(nextPosition,'checks') == "player"){
+            left.push(nextPosition)
+            console.log('breaku des')
+            break;
+
+        }
     }
     for(r = x; r <= 7; r+=1 )  {
-        right.push([position[0],r+1 ])
+        nextPosition = [position[0],r+1 ]
+
+        if(app.pieceClicked(nextPosition,'checks') == "empty" ){
+            right.push(nextPosition)
+        }else if(app.pieceClicked(nextPosition,'checks') == "enemy" || app.pieceClicked(nextPosition,'checks') == "player"){
+            right.push(nextPosition)
+            console.log('breaku des')
+            break;
+
+        }
     }
 
 
@@ -199,12 +320,19 @@ app.ValidateRook = function ValidateRook(){
     list.push(down);
     list.push(left);
     list.push(right);
-    ///app.MoveValidation.prototype.CheckStrikeAble(list,this.piece,false,"axes")
 
-    app.MoveValidation.prototype.Lightpath(list,this.piece,false)
+    if(arguments.length === 1){
+        app.MoveValidation.prototype.Lightpath(list,this.piece,false)
+        app.MoveValidation.prototype.CheckStrikeAble(list,this.piece,false,"axes")
 
-    ///app.MoveValidation.prototype.ClickPath(this.piece);
 
+    }
+    return {
+        tiles:{
+            move:list,
+            strike:list
+        }
+    }
 }
 
 app.ValidateBishop = function ValidateBishop(){
@@ -222,21 +350,57 @@ app.ValidateBishop = function ValidateBishop(){
         upLeft = [],
         downRight = [],
         downLeft = [],
+        nextPosition,
         position = this.piece.position;
     y = parseInt(position[0]);
     x = parseInt(position[1]);
+
     for(uR = y; uR > 0; uR-=1){
-        upRight.push([ uR-1,x+(y-uR)+1 ])
+        nextPosition = [ uR-1,x+(y-uR)+1 ];
+        if(app.pieceClicked(nextPosition,'checks') == "empty" ){
+            upRight.push(nextPosition)
+        }else if(app.pieceClicked(nextPosition,'checks') == "enemy" || app.pieceClicked(nextPosition,'checks') == "player"){
+            upRight.push(nextPosition)
+            console.log('breaku des')
+            break;
+
+        }
     }
     for(uL = y; uL > 0; uL-=1){
-        upLeft.push([ uL-1,x-(y-uL)-1 ])
+        nextPosition =[ uL-1,x-(y-uL)-1 ]
+        if(app.pieceClicked(nextPosition,'checks') == "empty" ){
+            upLeft.push(nextPosition)
+        }else if(app.pieceClicked(nextPosition,'checks') == "enemy" || app.pieceClicked(nextPosition,'checks') == "player"){
+            upLeft.push(nextPosition)
+            console.log('breaku des')
+            break;
+
+        }
+
     }
 
     for(dR = y; dR < 7; dR+=1){
-        downRight.push([ dR+1,x+(y-dR)-1 ])
+        nextPosition = [ dR+1,x+(y-dR)-1 ]
+        if(app.pieceClicked(nextPosition,'checks') == "empty" ){
+            downRight.push(nextPosition)
+        }else if(app.pieceClicked(nextPosition,'checks') == "enemy" || app.pieceClicked(nextPosition,'checks') == "player"){
+            downRight.push(nextPosition)
+            console.log('breaku des')
+            break;
+
+        }
+
     }
     for(dL = y; dL < 7; dL+=1){
-        downLeft.push([ dL+1,x-(y-dL)+1 ])
+        nextPosition = [ dL+1,x-(y-dL)+1 ]
+        if(app.pieceClicked(nextPosition,'checks') == "empty" ){
+            downLeft.push(nextPosition)
+        }else if(app.pieceClicked(nextPosition,'checks') == "enemy" || app.pieceClicked(nextPosition,'checks') == "player"){
+            downLeft.push(nextPosition)
+            console.log('breaku des')
+            break;
+
+        }
     }
 
 
@@ -244,13 +408,21 @@ app.ValidateBishop = function ValidateBishop(){
     list.push(upLeft);
     list.push(downRight);
     list.push(downLeft);
-    //app.MoveValidation.prototype.CheckStrikeAble(list,this.piece,false,"diagonal")
 
-    app.MoveValidation.prototype.Lightpath(list,this.piece,false)
+    if(arguments.length === 1){
 
-    //app.MoveValidation.prototype.ClickPath(this.piece);
+        app.MoveValidation.prototype.Lightpath(list,this.piece,false)
+        app.MoveValidation.prototype.CheckStrikeAble(list,this.piece,false,"diagonal")
 
-}
+
+
+    }
+    return {
+        tiles:{
+            move:list,
+            strike:list
+        }
+    }}
 
 app.ValidateQueen = function ValidateQueen(){
     app.MoveValidation.apply(this,arguments)
@@ -275,6 +447,7 @@ app.ValidateQueen = function ValidateQueen(){
         upRight = [],
         upLeft = [],
         downRight = [],
+        nextPosition,
         downLeft = []
     position = this.piece.position;
     y = parseInt(position[0]);
@@ -283,32 +456,101 @@ app.ValidateQueen = function ValidateQueen(){
 
 
     for(u = y; u > 0; u-=1){
-        up.push([ u-1,position[1] ])
+        nextPosition = [ u-1,position[1] ];
+        if(app.pieceClicked(nextPosition,'checks') == "empty" ){
+            up.push(nextPosition)
+        }else if(app.pieceClicked(nextPosition,'checks') == "enemy" || app.pieceClicked(nextPosition,'checks') == "player"){
+            up.push(nextPosition)
+            console.log('breaku des')
+            break;
+
+        }
+
     }
     for(d = y; d <= 7; d+=1 )  {
-        down.push([ d+1,position[1] ])
+        nextPosition = [ d+1,position[1] ]
+        if(app.pieceClicked(nextPosition,'checks') == "empty" ){
+            down.push(nextPosition)
+        }else if(app.pieceClicked(nextPosition,'checks') == "enemy" || app.pieceClicked(nextPosition,'checks') == "player"){
+            down.push(nextPosition)
+            console.log('breaku des')
+            break;
+
+        }
     }
 
     for(l = x; l > 0; l-=1){
-        left.push([position[0],l-1 ])
+        nextPosition = [position[0],l-1 ]
+        if(app.pieceClicked(nextPosition,'checks') == "empty" ){
+            left.push(nextPosition)
+        }else if(app.pieceClicked(nextPosition,'checks') == "enemy" || app.pieceClicked(nextPosition,'checks') == "player"){
+            left.push(nextPosition)
+            console.log('breaku des')
+            break;
+
+        }
     }
     for(r = x; r <= 7; r+=1 )  {
-        right.push([position[0],r+1 ])
+        nextPosition = [position[0],r+1 ]
+
+        if(app.pieceClicked(nextPosition,'checks') == "empty" ){
+            right.push(nextPosition)
+        }else if(app.pieceClicked(nextPosition,'checks') == "enemy" || app.pieceClicked(nextPosition,'checks') == "player"){
+            right.push(nextPosition)
+            console.log('breaku des')
+            break;
+
+        }
     }
 
     for(uR = y; uR > 0; uR-=1){
-        upRight.push([ uR-1,x+(y-uR)+1 ])
+        nextPosition = [ uR-1,x+(y-uR)+1 ];
+        if(app.pieceClicked(nextPosition,'checks') == "empty" ){
+            upRight.push(nextPosition)
+        }else if(app.pieceClicked(nextPosition,'checks') == "enemy" || app.pieceClicked(nextPosition,'checks') == "player"){
+            upRight.push(nextPosition)
+            console.log('breaku des')
+            break;
+
+        }
     }
     for(uL = y; uL > 0; uL-=1){
-        upLeft.push([ uL-1,x-(y-uL)-1 ])
+        nextPosition =[ uL-1,x-(y-uL)-1 ]
+        if(app.pieceClicked(nextPosition,'checks') == "empty" ){
+            upLeft.push(nextPosition)
+        }else if(app.pieceClicked(nextPosition,'checks') == "enemy" || app.pieceClicked(nextPosition,'checks') == "player"){
+            upLeft.push(nextPosition)
+            console.log('breaku des')
+            break;
+
+        }
+
     }
 
     for(dR = y; dR < 7; dR+=1){
-        downRight.push([ dR+1,x+(y-dR)-1 ])
+        nextPosition = [ dR+1,x+(y-dR)-1 ]
+        if(app.pieceClicked(nextPosition,'checks') == "empty" ){
+            downRight.push(nextPosition)
+        }else if(app.pieceClicked(nextPosition,'checks') == "enemy" || app.pieceClicked(nextPosition,'checks') == "player"){
+            downRight.push(nextPosition)
+            console.log('breaku des')
+            break;
+
+        }
+
     }
     for(dL = y; dL < 7; dL+=1){
-        downLeft.push([ dL+1,x-(y-dL)+1 ])
+        nextPosition = [ dL+1,x-(y-dL)+1 ]
+        if(app.pieceClicked(nextPosition,'checks') == "empty" ){
+            downLeft.push(nextPosition)
+        }else if(app.pieceClicked(nextPosition,'checks') == "enemy" || app.pieceClicked(nextPosition,'checks') == "player"){
+            downLeft.push(nextPosition)
+            console.log('breaku des')
+            break;
+
+        }
     }
+
 
 
     list.push(up);
@@ -320,13 +562,20 @@ app.ValidateQueen = function ValidateQueen(){
     list.push(upLeft);
     list.push(downRight);
     list.push(downLeft);
-    //app.MoveValidation.prototype.CheckStrikeAble(list,this.piece,false,"axes")
 
-    app.MoveValidation.prototype.Lightpath(list,this.piece,false)
+    if(arguments.length === 1){
 
-    //app.MoveValidation.prototype.ClickPath(this.piece);
 
-}
+        app.MoveValidation.prototype.Lightpath(list,this.piece,false)
+        app.MoveValidation.prototype.CheckStrikeAble(list,this.piece,false,"axes")
+
+
+    }
+
+    return {
+        move:list,
+        strike:list
+    }}
 
 app.ValidateKing = function ValidateKing(){
     app.MoveValidation.apply(this,arguments)
@@ -364,12 +613,19 @@ app.ValidateKing = function ValidateKing(){
     list.push(upLeft);
     list.push(downRight);
     list.push(downLeft);
-    //app.MoveValidation.prototype.CheckStrikeAble(list,this.piece,false,'axes')
-    app.MoveValidation.prototype.Lightpath(list,this.piece,false)
-   // app.MoveValidation.prototype.ClickPath(this.piece);
 
+    if(arguments.length === 1){
 
-}
+        app.MoveValidation.prototype.Lightpath(list,this.piece,false)
+        app.MoveValidation.prototype.CheckStrikeAble(list,this.piece,false,'axes')
+
+    }
+    return {
+        tiles:{
+            move:list,
+            strike:list
+        }
+    }}
 
 
 app.ValidateKnight = function ValidateKnight(){
@@ -384,7 +640,6 @@ app.ValidateKnight = function ValidateKnight(){
     position = this.piece.getposition();
     position[0] = parseInt(position[0]);
     position[1] = parseInt(position[1]);
-    console.log(position[0]+65)
 
     up.push([   position[0]-2,  position[1]+1  ], [ position[0]-2,  position[1]-1  ]);
     left.push([ position[0]+1,  position[1]+2  ], [ position[0]-1,  position[1]+2  ]);
@@ -396,14 +651,18 @@ app.ValidateKnight = function ValidateKnight(){
     list.push(down);
     list.push(left);
     list.push(right);
-    console.log(list)
-    //app.MoveValidation.prototype.CheckStrikeAble(list,this.piece,true,'axes')
-    app.MoveValidation.prototype.Lightpath(list,this.piece,true)
-    //app.MoveValidation.prototype.ClickPath(this.piece);
-    //app.MoveValidation.prototype.ClickPath(this.piece);
+    if(arguments.length === 1){
 
+        app.MoveValidation.prototype.Lightpath(list,this.piece,true)
+        app.MoveValidation.prototype.CheckStrikeAble(list,this.piece,true,'axes')
 
-}
+    }
+    return {
+        tiles:{
+            move:list,
+            strike:list
+        }
+    }}
 
 
 

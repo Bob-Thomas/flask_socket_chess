@@ -7,7 +7,7 @@ app.Piece = function Piece(position, type, id,color){
 };
 //app.Piece.prototype.color = function(color){this.color=color};
 app.Piece.prototype.setPosition = function(position){
-    this.position = position
+    this.position = position;
 };
 app.Piece.prototype.getposition = function(){
     return this.position
@@ -48,12 +48,8 @@ app.Pawn = function Pawn(){
     }
     this.promote = function(){
         var piece,parent,color,queen;
-        piece = $(".piece[data-piece='"+this.id+"']");
-        parent = piece.parent();
-        piece.remove();
         delete app.pieceSet[this.color][this.id]
         app.pieceSet[this.color]['wQ'+this.id[2]] = new app.Queen([0,this.position[1]],"wQ","wQ"+this.id[2],'white')
-        parent.append("<img class ='piece' data-piece='wQ"+this.id[2]+"' src="+'./img/chesspieces/wQ.png'+""+" height='75px' width='75px'/>")
 
     }
 
@@ -103,14 +99,15 @@ app.pieceSet = {};
 
 
 
-app.createPieces = function CreatePieces(player){
-    var pieceSet = [],
-        pieceList = [],
-        color = 'black',
+app.blackPieces = {};
+app.whitePieces = {};
+app.selectedPiece = undefined;
+app.startingPositions = function(){
+    var
         whitePawns,
-        blackPawns;
-
-    if(player == "first") {
+        blackPawns
+        ;
+    if(app.team == 'white'){
     app.blackPieces ={
         bR1:new app.Rook(  [0,0],'bR',"bR1"),
         bN1:new app.Knight([0,1],'bN',"bN1"),
@@ -133,10 +130,10 @@ app.createPieces = function CreatePieces(player){
         wN2:new app.Knight([7,6],'wN',"wN2"),
         wR2:new app.Rook(  [7,7],'wR',"wR2")
     };
+
         for(blackPawns=0; blackPawns < 8;blackPawns++){
             app.blackPieces["bP"+blackPawns]= new app.Pawn([1,blackPawns],"bP",("bP"+blackPawns),"black")
         }
-        color = 'white'
         for(whitePawns=0; whitePawns < 8;whitePawns++){
             app.whitePieces["wP"+whitePawns] = new app.Pawn([6,whitePawns],"wP",("wP"+whitePawns),"white")
         }
@@ -158,8 +155,8 @@ app.createPieces = function CreatePieces(player){
             wR1:new app.Rook(  [0,0],'wR',"wR1"),
             wN1:new app.Knight([0,1],'wN',"wN1"),
             wB1:new app.Bishop([0,2],'wB',"wB1"),
-            wK: new app.King(  [0,3],"wK","wK"),
-            wQ: new app.Queen( [0,4],'wQ',"wQ"),
+            wK :new app.King(  [0,3],"wK","wK"),
+            wQ :new app.Queen( [0,4],'wQ',"wQ"),
             wB2:new app.Bishop([0,5],'wB',"wB2"),
             wN2:new app.Knight([0,6],'wN',"wN2"),
             wR2:new app.Rook(  [0,7],'wR',"wR2")
@@ -168,25 +165,17 @@ app.createPieces = function CreatePieces(player){
         for(blackPawns=0; blackPawns < 8;blackPawns++){
             app.blackPieces["bP"+blackPawns]= new app.Pawn([6,blackPawns],"bP",("bP"+blackPawns),"black")
         }
-        color = 'white'
         for(whitePawns=0; whitePawns < 8;whitePawns++){
             app.whitePieces["wP"+whitePawns] = new app.Pawn([1,whitePawns],"wP",("wP"+whitePawns),"white")
         }
-
     }
 
-    pieceSet = {
-                white:app.whitePieces,
-                black:app.blackPieces
-    }
-    app.pieceSet = {
-                    white:app.whitePieces,
-                    black:app.blackPieces
-    }
-    return{pieceSet:pieceSet,
-        pieces:pieceList
 
+
+    app.pieceSet={
+        white:app.whitePieces,
+        black:app.blackPieces
     }
+
 
 }
-

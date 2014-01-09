@@ -9,6 +9,7 @@ from chess import app
 import re
 from datetime import datetime
 import database
+import hashlib
 # The socket.io namespace
 rooms = []
 
@@ -22,8 +23,34 @@ class Room(BaseNamespace, RoomsMixin, BroadcastMixin):
     def on_joinGame(self,data):
         self.join(data['room'])
 
+    def on_turnOver(self,data):
+        print "boe"
+        if data == 'white':
+            self.broadcast_event('getTurn', 'black')
+        else:
+            self.broadcast_event('getTurn', 'white')
+
+    def on_movePiece(self,data):
+        self.broadcast_event('moveEnemy',data)
+
+
+    def on_strikePiece(self,data):
+        self.broadcast_event('strikeEnemy',data)
+
+    def on_getTeam(self,data):
+        print data
+        team = 'white'
+        print playersInRoom(data['hash'],data['name'])
+        if playersInRoom(data['hash'],data['name']) == 1:
+            team = 'white'
+            self.emit('receiveTeam',team)
+        elif playersInRoom(data['hash'],data['name']) == 2:
+            team = 'black'
+            self.emit('receiveTeam',team)
+
     def on_enterLobby(self, data):
         self.socket.session['nickname'] = data
+        print "test"
         print self.socket.session['nickname']
         m = datetime.now().minute
         h = datetime.now().hour
@@ -46,6 +73,7 @@ class Room(BaseNamespace, RoomsMixin, BroadcastMixin):
     def on_create(self, data):
         print data
         self.join(data['roomName'])
+        createRoom(self.socket.session['nickname'],data['roomName'])
         self.room = {
             'creatorRank':getUserRank(self.socket.session['nickname']),
             'creator':self.socket.session['nickname'],
@@ -122,3 +150,43 @@ def getUserRank(user):
         if u.username.lower() == user:
             avatar = u.color+u.rank.title()
     return avatar
+
+def createRoom(creator,name):
+    hasher = hashlib.md5()
+    hasher.update(creator)
+    result = database.User.query.all()
+    for u in result:
+        if u.username.lower() == creator.lower():
+            print name.lower()
+            room = database.Room(u.id,name,creator.lower(),str(hasher.hexdigest()))
+            database.db.session.add(room)
+            database.db.session.commit()
+
+
+def deleteRoom(id):
+    result = database.Room.query.all()
+    for u in result:
+        if u.id == id.lower():
+            room = database.Room(u.creator,u.name,u.players)
+            database.db.session.delete(room)
+            database.db.session.commit()
+
+def playersInRoom(hash,name):
+    result = database.Room.query.all()
+    for item in result:
+        if(item.roomHash == hash):
+            amountPlayers = item.players.split(',')
+            if len(amountPlayers) == 1:
+                return 1
+            if len(amountPlayers) == 2:
+                for players in amountPlayers:
+                    if players.lower() == name.lower():
+                        return amountPlayers.index(players)+1
+
+
+
+def getRoomName(hash):
+    result = database.Room.query.all()
+    for item in result:
+        if(item.roomHash == hash):
+            return item.name
