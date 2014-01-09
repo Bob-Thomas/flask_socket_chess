@@ -1,9 +1,19 @@
-var app = function app(){};
+var app = {}
+app.team = undefined
+app.init = (function(){
+    var canvas = document.getElementById('canvas')
+    var ctx = canvas.getContext("2d");
+    var bgReady = false;
+    var bgImage = new Image();
+    bgImage.src = "../static/img/bg.jpg";
 
-$(document).ready(function(){
-    app.helper();
-    //app.chatClient();
-    app.chessClient();
-
-});
+    bgImage.onload = function () {
+        bgReady = true;
+    };
+    socket.emit('enterLobby',"bob")
+    return {
+        ctx:ctx,
+        canvas:canvas
+    }
+}())
 

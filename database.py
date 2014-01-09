@@ -30,4 +30,23 @@ class User(db.Model):
         def __repr__(self):
             return '<User %r>' % self.username
 
+class Room(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    creator = db.Column(db.Integer, db.ForeignKey('user.id'))
+    name = db.Column(db.String(80))
+    players = db.Column(db.String(200))
+    roomHash =  db.Column(db.String(200))
+
+    def __init__(self, creator, name,players,hash):
+        self.creator = creator
+        self.name = name
+        self.players = players
+        self.roomHash = hash
+
+
+        def __repr__(self):
+            return '<User %r>' % self.username
+
+
+
 db.create_all()

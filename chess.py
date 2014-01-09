@@ -5,6 +5,7 @@ from flask.ext.sqlalchemy import SQLAlchemy
 from socketio import socketio_manage
 from socketio.namespace import BaseNamespace
 from socketio.mixins import RoomsMixin, BroadcastMixin
+import hashlib
 import database
 # Flask routes
 
@@ -56,9 +57,48 @@ def lobby():
     else:
         return "you are not allowed to be here go away GROWL..."
 
-@app.route('/game', methods=['GET','POST'])
-def game():
-    return render_template('chess.html')
+@app.route('/game/<room>', methods=['GET','POST'])
+def game(room):
+    roomHash = room
+    print roomHash
+    result = database.Room.query.all()
+    for roomItem in result:
+        print "room name input " + room
+        print "room name database " + roomItem.players
+        print "roomHash -> "+ roomHash
+        if roomItem.roomHash == str(roomHash):
+            if 'loggedIn' in session:
+                print len(roomItem.players.split(',') )
+                if len(roomItem.players.split(',')) <= 1:
+                    rank = database.User.query.all()
+                    avatar = ''
+                    for u in rank:
+                        if u.username.lower() == session['username'].lower():
+                            avatar = u.color+u.rank.title()
+                    result = None
+                    return render_template('game.html',user=session['username'],avatar=avatar)
+                else:
+                    users = database.User.query.all()
+                    for user in users:
+                        for roomName in roomItem.players.split(','):
+                            print session['username'].lower()
+                            print roomName.lower()
+                            if(session['username'].lower() == roomName.lower()):
+                                rank = database.User.query.all()
+                                avatar = ''
+                                for u in rank:
+                                    if u.username.lower() == session['username'].lower():
+                                        avatar = u.color+u.rank.title()
+                                result = None
+                                return render_template('game.html',user=session['username'],avatar=avatar)
+                        else:
+                            result = None
+                            return "this room is full"
+            else:
+                return "you are not allowed to be here go away GROWL... create an acount on <a href='www.bmthomas.nl:9000' >this site </a> Or LOGIN"
+
+    else:
+        return "This room does not exist"
 
 
 def login(user, pw):
