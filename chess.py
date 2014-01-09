@@ -15,6 +15,8 @@ app.config.from_object('config')
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    if 'loggedIn' in session:
+        return redirect(url_for('lobby'))
     if request.method == 'POST':
         state = request.form['formState']
         print "LOGIN FORM"

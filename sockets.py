@@ -20,8 +20,6 @@ class Room(BaseNamespace, RoomsMixin, BroadcastMixin):
         self.emit_to_room('main_room', 'move enemy', data)
         print "ALA AKBHAR"
 
-    def on_joinGame(self,data):
-        self.join(data['room'])
 
     def on_turnOver(self,data):
         print "boe"
@@ -49,6 +47,7 @@ class Room(BaseNamespace, RoomsMixin, BroadcastMixin):
             self.emit('receiveTeam',team)
 
     def on_enterLobby(self, data):
+        addRooms()
         self.socket.session['nickname'] = data
         print "test"
         print self.socket.session['nickname']
@@ -71,20 +70,26 @@ class Room(BaseNamespace, RoomsMixin, BroadcastMixin):
         print "connected"
 
     def on_create(self, data):
-        print data
-        self.join(data['roomName'])
+        print data['roomName']
         createRoom(self.socket.session['nickname'],data['roomName'])
+
         self.room = {
             'creatorRank':getUserRank(self.socket.session['nickname']),
             'creator':self.socket.session['nickname'],
             'name': data['roomName'],
             'players': 1,
-            'inPlay': False
+            'inPlay': False,
+            'hash':getRoomHashByUser(self.socket.session['nickname'])
 
         }
         print rooms
         rooms.append(self.room)
         self.broadcast_event('lobbyCreated', rooms)
+
+    def on_joinGame(self,data):
+        print "game Joined"
+        self.join(data['hash'])
+        addPlayerToRoom(data['name'],data['hash'])
 
     def on_sendMessage(self, msg):
         print "boe"
@@ -183,10 +188,55 @@ def playersInRoom(hash,name):
                     if players.lower() == name.lower():
                         return amountPlayers.index(players)+1
 
-
+def getRoomHashByUser(name):
+    users = database.User.query.all()
+    userId = None
+    for user in users:
+        if user.username.lower() == name.lower():
+            userId = user.id
+            break
+    rooms = database.Room.query.all()
+    for room in rooms:
+        if room.creator == userId:
+            return room.roomHash
+            break
+    else:
+        return "no room"
 
 def getRoomName(hash):
     result = database.Room.query.all()
     for item in result:
         if(item.roomHash == hash):
             return item.name
+
+
+def addPlayerToRoom(name,hash):
+    print "TIME TO DO SOME STUFF RIGHT NAWH"
+    users = database.User.query.all()
+    for user in users:
+        if user.username.lower() == name.lower():
+            rooms = database.Room.query.all()
+            for room in rooms:
+                if room.roomHash == hash and name != room.players:
+                    print "yush"
+                    players = room.players+','+name
+                    database.Room.query.filter_by(roomHash=hash).update(dict(players=players))
+                    database.db.session.commit()
+                    break
+
+def addRooms():
+    global rooms
+    result = database.Room.query.all()
+    list = []
+    for room in result:
+        name = database.User.query.filter_by(id=str(room.creator)).first()
+        json = {
+            'creatorRank':getUserRank(name.username),
+            'creator':name.username,
+            'name': room.name,
+            'players': len(room.players.split(',')),
+            'inPlay': False,
+            'hash':getRoomHashByUser(name.username)
+        }
+        list.append(json)
+    rooms = list

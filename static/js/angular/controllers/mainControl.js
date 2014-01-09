@@ -128,6 +128,13 @@ app.controller('lobbyControl',["$scope","socket",function($scope,socket){
 
     }
 
+    $scope.joinRoom = function(hash){
+        socket.emit("joinGame",{
+                name:$scope.user,
+                hash:hash
+            })
+    }
+
 
 
 

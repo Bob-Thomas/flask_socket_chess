@@ -30,6 +30,8 @@ app.directive('lobbyChat',function($rootScope,socket){
                 scrollTop: area.prop('scrollHeight') - area.height() + 40
             }, 1);
         })
+
+
     };
 
     return{

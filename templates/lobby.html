@@ -54,7 +54,7 @@
                             <div class="item" ng-bind="room['creator']"></div>
                             <div ng-bind="room['players']+'/2'"></div>
                         </div>
-                        <i class=" circular add icon joinGame" style="margin-top:19px;"></i>
+                        <a ng-href='//www.bmthomas.nl:9000/game/{{room["hash"]}}' ng-click="joinRoom(room['hash'])"><i class=" circular add icon joinGame" style="margin-top:19px;"></i></a>
                     </div>
                 </div>
                 {%endraw%}

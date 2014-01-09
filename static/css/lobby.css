@@ -7,21 +7,22 @@ input[type='text']{
     text-align: center;
     width:100%;
     border:none;
-    border-top:2px dotted gray;
-    border-radius: 10px;
-    outline:none;
+    border-top:2px solid gray;
+}
+.joinGame{
+    cursor:pointer;
 }
 .joinGame:hover{
-  color: #81d2ff;
+    color: #50c3ff;
 }
 .lobby-boxes{
     height:500px;
 }
-.roomBox{
-    height:479px;
+.chatBox{
+    height:552px;
     overflow:hidden;
 }
-.chatBox{
+.roomBox{
     height:514px;
     overflow:hidden;
 }

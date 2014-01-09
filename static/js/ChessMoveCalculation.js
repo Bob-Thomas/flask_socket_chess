@@ -666,9 +666,9 @@ app.ValidateKnight = function ValidateKnight(){
 
 
 
-app.ValidatePawn.prototype = app.helper.inherit(app.MoveValidation.prototype);
-app.ValidateRook.prototype = app.helper.inherit(app.MoveValidation.prototype);
+app.ValidatePawn.prototype   = app.helper.inherit(app.MoveValidation.prototype);
+app.ValidateRook.prototype   = app.helper.inherit(app.MoveValidation.prototype);
 app.ValidateBishop.prototype = app.helper.inherit(app.MoveValidation.prototype);
 app.ValidateKnight.prototype = app.helper.inherit(app.MoveValidation.prototype);
-app.ValidateQueen.prototype = app.helper.inherit(app.MoveValidation.prototype);
-app.ValidateKing.prototype = app.helper.inherit(app.MoveValidation.prototype);
+app.ValidateQueen.prototype  = app.helper.inherit(app.MoveValidation.prototype);
+app.ValidateKing.prototype   = app.helper.inherit(app.MoveValidation.prototype);
