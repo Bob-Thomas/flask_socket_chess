@@ -7,15 +7,17 @@ socket.on('moveEnemy',function(data){
     console.log("move")
     for(var object in app.pieceSet[app.enemy]){
         var piece = app.pieceSet[app.enemy][object]
+        console.log()
         console.log("od "+ piece.getId())
         console.log("id" +data['player'])
         if(piece.getId() == data['player']){
             console.log('moved')
             console.log("movepiece  "+data['move'])
+            console.log("y  " + (7-data['move'][0]))
             if(app.team == 'white'){
-                piece.setPosition([data['move'][0]+1,data['move'][1]])
+                piece.setPosition([7-data['move'][0],data['move'][1]])
             }else{
-                piece.setPosition([data['move'][0]-1,data['move'][1]])
+                piece.setPosition([7-data['move'][0],data['move'][1]])
             }
             app.render()
             break;
@@ -40,7 +42,7 @@ socket.on('strikeEnemy',function(data){
         var piece = app.pieceSet[app.enemy][object]
 
         if(piece.getId() == data['player']){
-            piece.setPosition([data['move'][0],data['move'][1]])
+            piece.setPosition([7-data['move'][0],data['move'][1]])
             app.render()
             break;
         }

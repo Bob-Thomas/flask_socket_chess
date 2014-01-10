@@ -24,19 +24,21 @@ class Room(BaseNamespace, RoomsMixin, BroadcastMixin):
     def on_turnOver(self,data):
         print "boe"
         if data == 'white':
-            self.broadcast_event('getTurn', 'black')
+            self.emit_to_room(self.socket.session['room'], 'getTurn', 'black')
         else:
-            self.broadcast_event('getTurn', 'white')
+            self.emit_to_room(self.socket.session['room'], 'getTurn', 'white')
 
     def on_movePiece(self,data):
-        self.broadcast_event('moveEnemy',data)
+        self.emit_to_room(self.socket.session['room'], 'moveEnemy',data)
 
 
     def on_strikePiece(self,data):
-        self.broadcast_event('strikeEnemy',data)
+        self.emit_to_room(self.socket.session['room'], 'strikeEnemy',data)
 
     def on_getTeam(self,data):
         print data
+        self.socket.session['room'] = data['hash']
+        self.join(data['hash'])
         team = 'white'
         print playersInRoom(data['hash'],data['name'])
         if playersInRoom(data['hash'],data['name']) == 1:
