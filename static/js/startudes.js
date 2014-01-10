@@ -1,5 +1,11 @@
-app.startGame = function () {
-    app.startingPositions()
+app.startGame = function (datbaseBoard) {
+    if(!datbaseBoard){
+        app.startingPositions()
+    }
+    else{
+        app.startingPositions()
+        app.helper.parseBoard(datbaseBoard)
+    }
     app.render()
 };
 
@@ -11,15 +17,18 @@ socket.on('connect',function(){
             hash:window.location.href.toString().split('/')[4],
             name:name
         }
-                            )
+    )
 })
 
 socket.on("receiveTeam",function(data){
-    app.team = data
+    app.team = data['team']
     app.turn = 'white'
     app.enemy = (app.team == 'white') ? "black" : "white"
-
     console.log(app.team)
-    app.startGame()
+    if(data['board']){
+        app.startGame(data['board'])
+    }else{
+        app.startGame()
+    }
 })
 

@@ -36,12 +36,14 @@ class Room(db.Model):
     name = db.Column(db.String(80))
     players = db.Column(db.String(200))
     roomHash =  db.Column(db.String(200))
+    board =   db.Column(db.String(2000))
 
-    def __init__(self, creator, name,players,hash):
+    def __init__(self, creator, name,players,hash,board):
         self.creator = creator
         self.name = name
         self.players = players
         self.roomHash = hash
+        self.board = board
 
 
         def __repr__(self):

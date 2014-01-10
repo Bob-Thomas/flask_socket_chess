@@ -87,6 +87,10 @@ app.MoveValidation.prototype.Lightpath = function LightPath(tiles,piece,canJump)
                                     move:tileItem,
                                     player:piece.getId()}
                             )
+                            socket.emit("updateBoard",{
+                                hash:window.location.href.toString().split('/')[4],
+                                board:app.helper.parseBoard()
+                            })
                             app.turn = app.enemy
                             if(piece.getType()[1] == "P"){
                             if(tileItem[0] == 0){
@@ -121,21 +125,27 @@ app.MoveValidation.prototype.Lightpath = function LightPath(tiles,piece,canJump)
                                        player:piece.getId()
                                        }
                                    )
-                                   app.turn = app.enemy
-                                   socket.emit('turnOver',app.turn)
+
                                    if(piece.getType()[1] == 'P'){
                                    if(tileItem[0] == 0){
                                        piece.promote()
                                    }
                                    piece.enpasent = false;
+                                   socket.emit('turnOver',app.turn)
+                                   app.turn = app.enemy
                                }
                                    if(enemyPiece.getType()[1] == 'K'){
                                        socket.emit("gameover",app.team)
                                        app.startingPositions()
                                    }
-                                   app.render()
-                                   app.selectedPiece = undefined
+                                   socket.emit("updateBoard",{
+                                       hash:window.location.href.toString().split('/')[4],
+                                       board:app.helper.parseBoard()
+                                   })
                                }
+
+                                app.selectedPiece = undefined
+                                app.render()
 
                             }
 
