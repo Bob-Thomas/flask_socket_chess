@@ -1,9 +1,9 @@
 socket.on('getTurn',function(data){
-    console.log("test")
+    console.log("test " + data)
     app.turn = data;
 })
 socket.on('redrawBoard',function(data){
-    app.helper.parseBoard(data['board'])
+    app.helper.parseBoard(data['board'],data['team'])
     app.render()
 
 })

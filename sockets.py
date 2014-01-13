@@ -23,10 +23,15 @@ class Room(BaseNamespace, RoomsMixin, BroadcastMixin):
 
     def on_turnOver(self,data):
         print "boe"
-        if data == 'white':
-            self.emit_to_room(self.socket.session['room'], 'getTurn', 'black')
+        print data
+        turn = ""
+        if data['turn'] == 'white':
+            turn = 'white'
+            self.emit_to_room(self.socket.session['room'], 'getTurn', turn)
         else:
-            self.emit_to_room(self.socket.session['room'], 'getTurn', 'white')
+            turn = 'black'
+            self.emit_to_room(self.socket.session['room'], 'getTurn', turn)
+        updateTurn(data['hash'], turn)
 
     def on_movePiece(self,data):
         self.emit_to_room(self.socket.session['room'], 'moveEnemy',data)
@@ -48,12 +53,14 @@ class Room(BaseNamespace, RoomsMixin, BroadcastMixin):
         if playersInRoom(data['hash'],data['name']) == 1:
             team = 'white'
             self.emit('receiveTeam',{'team':team,
-                                     'board':returnBoard(data['hash'])}
+                                     'board':returnBoard(data['hash']),
+                                     'turn':returnTurn(data['hash'])}
             )
         elif playersInRoom(data['hash'],data['name']) == 2:
             team = 'black'
             self.emit('receiveTeam',{'team':team,
-                                     'board':returnBoard(data['hash'])})
+                                     'board':returnBoard(data['hash']),
+                                     'turn':returnTurn(data['hash'])})
 
 
     def on_enterLobby(self, data):
@@ -272,3 +279,13 @@ def returnBoard(hash):
     for item in result:
         if item.roomHash.lower() == hash.lower():
             return item.board
+
+def returnTurn(hash):
+    result = database.Room.query.all()
+    for item in result:
+        if item.roomHash.lower() == hash.lower():
+            return item.turn
+
+def updateTurn(hash,turn):
+    database.Room.query.filter_by(roomHash=hash).update(dict(turn=str(turn)))
+    database.db.session.commit()

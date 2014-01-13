@@ -4,7 +4,7 @@ app.startGame = function (datbaseBoard) {
     }
     else{
         app.startingPositions()
-        app.helper.parseBoard(datbaseBoard)
+        app.helper.parseBoard(datbaseBoard,app.turn)
     }
     app.render()
 };
@@ -22,7 +22,7 @@ socket.on('connect',function(){
 
 socket.on("receiveTeam",function(data){
     app.team = data['team']
-    app.turn = 'white'
+    app.turn = data['turn']
     app.enemy = (app.team == 'white') ? "black" : "white"
     console.log(app.team)
     if(data['board']){

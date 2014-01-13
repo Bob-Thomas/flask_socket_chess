@@ -37,6 +37,7 @@ class Room(db.Model):
     players = db.Column(db.String(200))
     roomHash =  db.Column(db.String(200))
     board =   db.Column(db.String(2000))
+    turn = db.Column(db.String(20))
 
     def __init__(self, creator, name,players,hash,board):
         self.creator = creator
@@ -44,7 +45,7 @@ class Room(db.Model):
         self.players = players
         self.roomHash = hash
         self.board = board
-
+        self.turn = "white"
 
         def __repr__(self):
             return '<User %r>' % self.username

@@ -66,10 +66,10 @@ app.MoveValidation.prototype.Lightpath = function LightPath(tiles,piece,canJump)
             tileItem,
             list,
             checks
-            color,
+        color,
             tiles,
             ctx = app.init.ctx
-            ;
+        ;
         var strikeCoords;
         tiles = steps.move;
         strikeCoords = steps.strike;
@@ -82,21 +82,25 @@ app.MoveValidation.prototype.Lightpath = function LightPath(tiles,piece,canJump)
                         if(clickedPos[0] === tileItem[0] && clickedPos[1] === tileItem[1] && app.pieceClicked(tileItem,'checks') == 'empty' ){
                             app.selectedPiece = null;
                             piece.setPosition(tileItem)
-                            socket.emit('turnOver',app.turn)
+                            app.turn = app.enemy
+                            socket.emit('turnOver',{
+                                turn:app.turn,
+                                hash:window.location.href.toString().split('/')[4]
+                            })
                             socket.emit('movePiece',{
                                     move:tileItem,
                                     player:piece.getId()}
                             )
                             socket.emit("updateBoard",{
                                 hash:window.location.href.toString().split('/')[4],
-                                board:app.helper.parseBoard()
+                                board:app.helper.parseBoard(),
+                                team:app.team
                             })
-                            app.turn = app.enemy
                             if(piece.getType()[1] == "P"){
-                            if(tileItem[0] == 0){
-                                piece.promote()
-                            }
-                            piece.enpasent = false;
+                                if(tileItem[0] == 0){
+                                    piece.promote()
+                                }
+                                piece.enpasent = false;
                             }
                             app.render()
                         }
@@ -110,39 +114,43 @@ app.MoveValidation.prototype.Lightpath = function LightPath(tiles,piece,canJump)
                         tileItem = [strikeCoords[list][checks][0],strikeCoords[list][checks][1]]
                         if(clickedPos[0] === tileItem[0] && clickedPos[1] === tileItem[1] && app.pieceClicked(tileItem,'checks') == 'enemy' ){
                             for(var object in app.pieceSet[app.enemy]){
-                               var enemyPiece = app.pieceSet[app.enemy][object]
-                               var
-                                   enemyX = enemyPiece.getposition()[1],
-                                   enemyY = enemyPiece.getposition()[0]
-                               ;
-                               if(clickedPos[1] == enemyX && clickedPos[0] == enemyY){
-                                   enemyPiece.setAlive(false)
-                                   enemyPiece.setPosition([-1,-1])
-                                   piece.setPosition(tileItem)
-                                   socket.emit('strikePiece',{
-                                       enemy:enemyPiece.getId(),
-                                       move:tileItem,
-                                       player:piece.getId()
-                                       }
-                                   )
+                                var enemyPiece = app.pieceSet[app.enemy][object]
+                                var
+                                    enemyX = enemyPiece.getposition()[1],
+                                    enemyY = enemyPiece.getposition()[0]
+                                    ;
+                                if(clickedPos[1] == enemyX && clickedPos[0] == enemyY){
+                                    enemyPiece.setAlive(false)
+                                    enemyPiece.setPosition([-1,-1])
+                                    piece.setPosition(tileItem)
+                                    socket.emit('strikePiece',{
+                                            enemy:enemyPiece.getId(),
+                                            move:tileItem,
+                                            player:piece.getId()
+                                        }
+                                    )
 
-                                   if(piece.getType()[1] == 'P'){
-                                   if(tileItem[0] == 0){
-                                       piece.promote()
-                                   }
-                                   piece.enpasent = false;
-                                   socket.emit('turnOver',app.turn)
-                                   app.turn = app.enemy
-                               }
-                                   if(enemyPiece.getType()[1] == 'K'){
-                                       socket.emit("gameover",app.team)
-                                       app.startingPositions()
-                                   }
-                                   socket.emit("updateBoard",{
-                                       hash:window.location.href.toString().split('/')[4],
-                                       board:app.helper.parseBoard()
-                                   })
-                               }
+                                    if(piece.getType()[1] == 'P'){
+                                        if(tileItem[0] == 0){
+                                            piece.promote()
+                                        }
+                                        piece.enpasent = false;
+                                        app.turn = app.enemy
+                                        socket.emit('turnOver',{
+                                            turn:app.turn,
+                                            hash:window.location.href.toString().split('/')[4]}
+                                        )
+                                    }
+                                    if(enemyPiece.getType()[1] == 'K'){
+                                        socket.emit("gameover",app.team)
+                                        app.startingPositions()
+                                    }
+                                    socket.emit("updateBoard",{
+                                        hash:window.location.href.toString().split('/')[4],
+                                        board:app.helper.parseBoard(),
+                                        team:app.team
+                                    })
+                                }
 
                                 app.selectedPiece = undefined
                                 app.render()
