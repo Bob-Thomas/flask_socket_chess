@@ -20,6 +20,9 @@ class Room(BaseNamespace, RoomsMixin, BroadcastMixin):
         self.emit_to_room('main_room', 'move enemy', data)
         print "ALA AKBHAR"
 
+    def on_sendMessageGameroom(self,data):
+
+        self.emit_to_room(data['hash'],'gameMessage',data)
 
     def on_turnOver(self,data):
         print "boe"
@@ -49,14 +52,15 @@ class Room(BaseNamespace, RoomsMixin, BroadcastMixin):
         print data
         self.socket.session['room'] = data['hash']
         self.join(data['hash'])
-        print "spelers - " + str(playersInRoom(data['hash'],data['name']))
-        if playersInRoom(data['hash'],data['name']) == 1:
+        print "spelers - " + str(playersInRoom(data['hash'],data['name'],False))
+        self.emit("playersInRoom", playersInRoom(data['hash'],data['name'],True))
+        if playersInRoom(data['hash'],data['name'],False) == 1:
             team = 'white'
             self.emit('receiveTeam',{'team':team,
                                      'board':returnBoard(data['hash']),
                                      'turn':returnTurn(data['hash'])}
             )
-        elif playersInRoom(data['hash'],data['name']) == 2:
+        elif playersInRoom(data['hash'],data['name'],False) == 2:
             team = 'black'
             self.emit('receiveTeam',{'team':team,
                                      'board':returnBoard(data['hash']),
@@ -193,17 +197,22 @@ def deleteRoom(id):
             database.db.session.delete(room)
             database.db.session.commit()
 
-def playersInRoom(hash,name):
+def playersInRoom(hash,name,names):
     result = database.Room.query.all()
-    for item in result:
-        if(item.roomHash == hash):
-            amountPlayers = item.players.split(',')
-            if len(amountPlayers) == 2:
-                for players in amountPlayers:
-                    if players.lower() == name.lower():
-                        return amountPlayers.index(players)+1
-            else:
-                return 1
+    if not names:
+        for item in result:
+            if(item.roomHash == hash):
+                amountPlayers = item.players.split(',')
+                if len(amountPlayers) == 2:
+                    for players in amountPlayers:
+                        if players.lower() == name.lower():
+                            return amountPlayers.index(players)+1
+                else:
+                    return 1
+    else:
+        for item in result:
+            if(item.roomHash == hash):
+                return item.players
 
 def getRoomHashByUser(name):
     users = database.User.query.all()

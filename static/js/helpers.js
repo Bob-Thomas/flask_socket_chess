@@ -20,7 +20,7 @@ app.helper.inherit = function inherit(proto){
 }
 
 
-app.helper.parseBoard = function parseBoard(build,team){
+app.helper.parseBoard = function parseBoard(build,team,firstLoad){
     var board
     var col
     if(build){
@@ -43,22 +43,44 @@ app.helper.parseBoard = function parseBoard(build,team){
             rowString.push(board[pieces])
 
         }
-        if(app.team == 'black' && team == 'white'){
-            console.log("swagaroni " +newBoard.length)
-            newBoard = newBoard.reverse()
-            for(var i = 0; i < newBoard.length; i++){
-                newBoard[i] = newBoard[i].reverse()
-            }
-
-
+        console.log("turn = "+app.turn + ": team = "+app.team)
+        console.log("BOARD FROM DATABASE")
+        for(var i =0; i < newBoard.length;i++){
+            console.log(newBoard[i])
         }
 
-        if(app.team == 'white' && team == 'black'){
-            for(var i = 0; i < newBoard.length; i++){
-                newBoard[i] = newBoard[i].reverse()
+        if(!firstLoad){
+            if(app.team !== app.turn){
+                newBoard = newBoard.reverse()
+
+                for(var i = 0; i < newBoard.length; i++){
+                    newBoard[i] = newBoard[i].reverse()
+                }
+            }
+
+            if(app.team  === app.turn){
+                newBoard = newBoard.reverse()
+            }
+        }
+        else{
+
+
+            if(app.team  === app.turn){
+                newBoard = newBoard.reverse()
+                console.log("flip vertical and horizontal")
+
+                for(var i = 0; i < newBoard.length; i++){
+                    newBoard[i] = newBoard[i].reverse()
+                }
             }
 
         }
+        console.log("NEW BOARD")
+
+        for(var i =0; i < newBoard.length;i++){
+            console.log(newBoard[i])
+        }
+
         for(var i = 0; i < 8 ; i+=1){
             for(var j =0; j < 8; j+=1) {
                 for ( var team in app.pieceSet){
@@ -79,14 +101,15 @@ app.helper.parseBoard = function parseBoard(build,team){
 
     }else{
         board =
-            [['x', 'x', 'x', 'x', 'x', 'x', 'x', 'x'],
+            [   ['x', 'x', 'x', 'x', 'x', 'x', 'x', 'x'],
                 ['x', 'x', 'x', 'x', 'x', 'x', 'x', 'x'],
                 ['x', 'x', 'x', 'x', 'x', 'x', 'x', 'x'],
                 ['x', 'x', 'x', 'x', 'x', 'x', 'x', 'x'],
                 ['x', 'x', 'x', 'x', 'x', 'x', 'x', 'x'],
                 ['x', 'x', 'x', 'x', 'x', 'x', 'x', 'x'],
                 ['x', 'x', 'x', 'x', 'x', 'x', 'x', 'x'],
-                ['x', 'x', 'x', 'x', 'x', 'x', 'x', 'x']]
+                ['x', 'x', 'x', 'x', 'x', 'x', 'x', 'x']
+            ]
 
 
 
@@ -97,7 +120,7 @@ app.helper.parseBoard = function parseBoard(build,team){
                     pieceX = piece.getposition()[1],
                     pieceY = piece.getposition()[0]
                     ;
-                if(pieceY > 0 || pieceX > 0){
+                if(pieceY >= 0 || pieceX >= 0){
                     board[pieceY][pieceX] = piece.getId()
                 }
 
@@ -105,12 +128,8 @@ app.helper.parseBoard = function parseBoard(build,team){
         }
 
 
-        if(app.team == 'white'){
-            return board.toString()
-        }
-        else{
-            return board.reverse().toString()
-        }
+        return board.toString()
+
 
 
     }

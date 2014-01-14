@@ -83,18 +83,14 @@ app.MoveValidation.prototype.Lightpath = function LightPath(tiles,piece,canJump)
                             app.selectedPiece = null;
                             piece.setPosition(tileItem)
                             app.turn = app.enemy
-                            socket.emit('turnOver',{
-                                turn:app.turn,
-                                hash:window.location.href.toString().split('/')[4]
-                            })
-                            socket.emit('movePiece',{
-                                    move:tileItem,
-                                    player:piece.getId()}
-                            )
                             socket.emit("updateBoard",{
                                 hash:window.location.href.toString().split('/')[4],
                                 board:app.helper.parseBoard(),
                                 team:app.team
+                            })
+                            socket.emit('turnOver',{
+                                turn:app.turn,
+                                hash:window.location.href.toString().split('/')[4]
                             })
                             if(piece.getType()[1] == "P"){
                                 if(tileItem[0] == 0){
@@ -135,21 +131,22 @@ app.MoveValidation.prototype.Lightpath = function LightPath(tiles,piece,canJump)
                                             piece.promote()
                                         }
                                         piece.enpasent = false;
-                                        app.turn = app.enemy
-                                        socket.emit('turnOver',{
-                                            turn:app.turn,
-                                            hash:window.location.href.toString().split('/')[4]}
-                                        )
+
                                     }
                                     if(enemyPiece.getType()[1] == 'K'){
                                         socket.emit("gameover",app.team)
-                                        app.startingPositions()
+                                        document.write("SOMEONE WON")
                                     }
                                     socket.emit("updateBoard",{
                                         hash:window.location.href.toString().split('/')[4],
                                         board:app.helper.parseBoard(),
                                         team:app.team
                                     })
+                                    app.turn = app.enemy
+                                    socket.emit('turnOver',{
+                                            turn:app.turn,
+                                            hash:window.location.href.toString().split('/')[4]}
+                                    )
                                 }
 
                                 app.selectedPiece = undefined

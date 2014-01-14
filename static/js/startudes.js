@@ -4,7 +4,7 @@ app.startGame = function (datbaseBoard) {
     }
     else{
         app.startingPositions()
-        app.helper.parseBoard(datbaseBoard,app.turn)
+        app.helper.parseBoard(datbaseBoard,app.turn,true)
     }
     app.render()
 };
@@ -19,8 +19,13 @@ socket.on('connect',function(){
         }
     )
 })
-
+socket.on('playersInRoom',function(data){
+    console.log("players" +data)
+    var box = document.querySelectorAll('.information')[0];
+    box.innerHTML = data;
+})
 socket.on("receiveTeam",function(data){
+    app.chatControl();
     app.team = data['team']
     app.turn = data['turn']
     app.enemy = (app.team == 'white') ? "black" : "white"
