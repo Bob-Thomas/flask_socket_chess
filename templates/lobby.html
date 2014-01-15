@@ -65,6 +65,10 @@
                 <div class="header item">Account <h1 class="ui header">
                     <img class="ui avatar image" src="../img/chesspieces/{{avatar}}.png">{{user}}
                 </h1>
+                   <div class="item">
+                       <div class="wins" ng-bind="'wins:'+stats.wins"></div>
+                       <div class="loses" ng-bind="'loses:'+stats.loses"></div>
+                   </div>
                 </div>
             </div>
         </div>
