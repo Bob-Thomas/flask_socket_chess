@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>THA GAME</title>
+    <link rel="stylesheet" href="/static/css/game.css">
+
+</head>
+<body>
+<script type="text/javascript" src="/static/socket.io.js"></script>
+<div id="player">{{user}}</div>
+<div id="content">
+    <div id="chat" class="rectangle messageBox">
+        <div class="information topTitle">{{players}}</div>
+        <div class="messages">
+
+
+        </div>
+        <input type="text" class="chatInput">
+    </div>
+    <div id="board">
+        <canvas id = 'canvas' width="600px" height="600px"></canvas>
+    </div>
+</div>
+<script src="/static/js/sockets.js"></script>
+<script src="/static/js/main.js"></script>
+<script src="/static/js/helpers.js"></script>
+<script src="/static/js/gameChat.js"></script>
+<script src="/static/js/pieceModule.js"></script>
+<script src="/static/js/eventController.js"></script>
+<script src="/static/js/ChessMoveCalculation.js"></script>
+<script src="/static/js/rendering.js"></script>
+<script src="/static/js/socketControl.js"></script>
+<script src="/static/js/startudes.js"></script>
+</body>
+</html>
