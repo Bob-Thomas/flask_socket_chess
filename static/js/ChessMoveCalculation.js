@@ -95,6 +95,11 @@ app.MoveValidation.prototype.Lightpath = function LightPath(tiles,piece,canJump)
                             if(piece.getType()[1] == "P"){
                                 if(tileItem[0] == 0){
                                     piece.promote()
+                                    socket.emit("promotePiece",{
+                                        color:app.team,
+                                        id:piece.getId()
+
+                                    })
                                 }
                                 piece.enpasent = false;
                             }
@@ -129,13 +134,17 @@ app.MoveValidation.prototype.Lightpath = function LightPath(tiles,piece,canJump)
                                     if(piece.getType()[1] == 'P'){
                                         if(tileItem[0] == 0){
                                             piece.promote()
+                                            socket.emit("promotePiece",{
+                                                color:app.team,
+                                                id:piece.getId()
+
+                                            })
                                         }
                                         piece.enpasent = false;
 
                                     }
                                     if(enemyPiece.getType()[1] == 'K'){
-                                        socket.emit("gameover",app.team)
-                                        document.write("SOMEONE WON")
+                                        socket.emit("gameOver",app.team)
                                     }
                                     socket.emit("updateBoard",{
                                         hash:window.location.href.toString().split('/')[4],

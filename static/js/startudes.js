@@ -25,6 +25,14 @@ socket.on('playersInRoom',function(data){
     box.innerHTML = data;
 })
 socket.on("receiveTeam",function(data){
+    var
+        loader = document.querySelectorAll('.loader')[0],
+        content = document.getElementById('content')
+    ;
+
+    loader.style.display = 'none'
+    content.className = content.className.replace('hidden','');
+
     app.chatControl();
     app.team = data['team']
     app.turn = data['turn']

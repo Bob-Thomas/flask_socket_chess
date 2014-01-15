@@ -10,7 +10,6 @@ app.init = (function(){
     bgImage.onload = function () {
         bgReady = true;
     };
-    socket.emit('enterLobby',"bob")
     return {
         ctx:ctx,
         canvas:canvas

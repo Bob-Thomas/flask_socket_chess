@@ -49,7 +49,7 @@ app.Pawn = function Pawn(){
     this.promote = function(){
         var piece,parent,color,queen;
         delete app.pieceSet[this.color][this.id]
-        app.pieceSet[this.color]['wQ'+this.id[2]] = new app.Queen([0,this.position[1]],"wQ","wQ"+this.id[2],'white')
+        app.pieceSet[this.color][this.id[0]+'Q'+this.id[2]] = new app.Queen([0,this.position[1]],this.id[0]+"Q",this.id[0]+"Q"+this.id[2],this.color)
 
     }
 

@@ -89,6 +89,7 @@ app.controller('lobbyControl',["$scope","socket",function($scope,socket){
     $scope.messages = [];
     $scope.user = '';
     $scope.userRank = ''
+    $scope.stats = {wins:0,loses:0}
 
 
     socket.emit('enterLobby',$scope.userName);
@@ -96,6 +97,9 @@ app.controller('lobbyControl',["$scope","socket",function($scope,socket){
     socket.on('nickname',function(data){
         $scope.user = data['name'];
         $scope.userRank = data['rank']
+        $scope.stats.wins = data['wins']
+        $scope.stats.loses = data['loses']
+        console.log(data)
     })
 
     socket.on('message',function(data){
@@ -113,7 +117,10 @@ app.controller('lobbyControl',["$scope","socket",function($scope,socket){
         $scope.rooms = []
         for(var stuff in data){
             if ($scope.rooms[stuff] !== data[stuff]){
-                $scope.rooms.push(data[stuff])
+                console.log("testing" +data[stuff]['players'])
+                if(data[stuff]['players'] <= 1){
+                    $scope.rooms.push(data[stuff])
+                }
             }
         }
         console.log($scope.rooms)

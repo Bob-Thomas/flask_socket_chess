@@ -1,4 +1,6 @@
-from gevent import monkey; monkey.patch_all()
+from gevent import monkey;
+
+monkey.patch_all()
 from flask import Flask, request, session, g, redirect, url_for, \
     abort, render_template, flash, send_from_directory
 from socketio import socketio_manage
@@ -15,16 +17,15 @@ rooms = []
 
 
 class Room(BaseNamespace, RoomsMixin, BroadcastMixin):
-
     def on_move(self, data):
         self.emit_to_room('main_room', 'move enemy', data)
         print "ALA AKBHAR"
 
-    def on_sendMessageGameroom(self,data):
+    def on_sendMessageGameroom(self, data):
 
-        self.emit_to_room(data['hash'],'gameMessage',data)
+        self.emit_to_room(data['hash'], 'gameMessage', data)
 
-    def on_turnOver(self,data):
+    def on_turnOver(self, data):
         print "boe"
         print data
         turn = ""
@@ -36,35 +37,43 @@ class Room(BaseNamespace, RoomsMixin, BroadcastMixin):
             self.emit_to_room(self.socket.session['room'], 'getTurn', turn)
         updateTurn(data['hash'], turn)
 
-    def on_movePiece(self,data):
-        self.emit_to_room(self.socket.session['room'], 'moveEnemy',data)
-
-    def on_updateBoard(self,data):
-        updateBoard(data['hash'],data['board'])
-        self.emit_to_room(self.socket.session['room'], 'redrawBoard',data)
+    def on_gameOver(self,data):
+        updatePlayerScore(playersInRoom(self.socket.session['room'], 'banan', True),data)
+        self.emit_to_room(self.socket.session['room'], 'gameFinished',data)
+        self.emit('gameFinished',data)
 
 
+    def on_movePiece(self, data):
+        self.emit_to_room(self.socket.session['room'], 'moveEnemy', data)
 
-    def on_strikePiece(self,data):
-        self.emit_to_room(self.socket.session['room'], 'strikeEnemy',data)
+    def on_promotePiece(self, data):
+        self.emit_to_room(self.socket.session['room'], 'promotePiece', data)
 
-    def on_getTeam(self,data):
+    def on_updateBoard(self, data):
+        updateBoard(data['hash'], data['board'])
+        self.emit_to_room(self.socket.session['room'], 'redrawBoard', data)
+
+
+    def on_strikePiece(self, data):
+        self.emit_to_room(self.socket.session['room'], 'strikeEnemy', data)
+
+    def on_getTeam(self, data):
         print data
         self.socket.session['room'] = data['hash']
         self.join(data['hash'])
-        print "spelers - " + str(playersInRoom(data['hash'],data['name'],False))
-        self.emit("playersInRoom", playersInRoom(data['hash'],data['name'],True))
-        if playersInRoom(data['hash'],data['name'],False) == 1:
+        print "spelers - " + str(playersInRoom(data['hash'], data['name'], False))
+        self.emit("playersInRoom", playersInRoom(data['hash'], data['name'], True))
+        if playersInRoom(data['hash'], data['name'], False) == 1:
             team = 'white'
-            self.emit('receiveTeam',{'team':team,
-                                     'board':returnBoard(data['hash']),
-                                     'turn':returnTurn(data['hash'])}
+            self.emit('receiveTeam', {'team': team,
+                                      'board': returnBoard(data['hash']),
+                                      'turn': returnTurn(data['hash'])}
             )
-        elif playersInRoom(data['hash'],data['name'],False) == 2:
+        elif playersInRoom(data['hash'], data['name'], False) == 2:
             team = 'black'
-            self.emit('receiveTeam',{'team':team,
-                                     'board':returnBoard(data['hash']),
-                                     'turn':returnTurn(data['hash'])})
+            self.emit('receiveTeam', {'team': team,
+                                      'board': returnBoard(data['hash']),
+                                      'turn': returnTurn(data['hash'])})
 
 
     def on_enterLobby(self, data):
@@ -75,42 +84,45 @@ class Room(BaseNamespace, RoomsMixin, BroadcastMixin):
         m = datetime.now().minute
         h = datetime.now().hour
         message = {
-            'rank':'bK',
-            'name':"ALL MIGHTY SEVER",
-            'time':str(h)+":"+str(m),
-            'message':'%s has connected' % self.socket.session['nickname']
+            'rank': 'bK',
+            'name': "ALL MIGHTY SEVER",
+            'time': str(h) + ":" + str(m),
+            'message': '%s has connected' % self.socket.session['nickname']
         }
         self.broadcast_event('message', message)
         # Just have them join a default-named room
         self.join('lobby')
+
         self.emit('nickname', {
-            'name':self.socket.session['nickname'],
-            'rank':getUserRank(self.socket.session['nickname'])
+            'name':  self.socket.session['nickname'],
+            'rank':  getUserRank(self.socket.session['nickname']),
+            'wins':  getUserStats(self.socket.session['nickname'])['wins'],
+            'loses': getUserStats(self.socket.session['nickname'])['loses']
         })
         self.broadcast_event('lobbyCreated', rooms)
         print "connected"
 
     def on_create(self, data):
         print data['roomName']
-        createRoom(self.socket.session['nickname'],data['roomName'])
+        createRoom(self.socket.session['nickname'], data['roomName'])
 
         self.room = {
-            'creatorRank':getUserRank(self.socket.session['nickname']),
-            'creator':self.socket.session['nickname'],
+            'creatorRank': getUserRank(self.socket.session['nickname']),
+            'creator': self.socket.session['nickname'],
             'name': data['roomName'],
             'players': 1,
             'inPlay': False,
-            'hash':getRoomHashByUser(self.socket.session['nickname'])
+            'hash': getRoomHashByUser(self.socket.session['nickname'])
 
         }
         print rooms
         rooms.append(self.room)
         self.broadcast_event('lobbyCreated', rooms)
 
-    def on_joinGame(self,data):
+    def on_joinGame(self, data):
         print "game Joined"
         self.join(data['hash'])
-        addPlayerToRoom(data['name'],data['hash'])
+        addPlayerToRoom(data['name'], data['hash'])
 
     def on_sendMessage(self, msg):
         print "boe"
@@ -123,8 +135,9 @@ class Room(BaseNamespace, RoomsMixin, BroadcastMixin):
         if data.has_key('value'):
             print data['value']
             print "validating"
-            print checkUser(data['name'],data['value'], database.User,)
-            self.emit('validation', {'name':data['name'],'answer': checkUser(data['name'],data['value'], database.User,)})
+            print checkUser(data['name'], data['value'], database.User, )
+            self.emit('validation',
+                      {'name': data['name'], 'answer': checkUser(data['name'], data['value'], database.User, )})
 
     def recv_disconnect(self):
         # Remove nickname from the list
@@ -136,10 +149,10 @@ class Room(BaseNamespace, RoomsMixin, BroadcastMixin):
                 if item['creator'] == nickname:
                     rooms.remove(item)
             message = {
-                'rank':'bK',
-                'name':"ALL MIGHTY SEVER",
-                'time':str(h)+":"+str(m),
-                'message':'%s has disconnected' % nickname
+                'rank': 'bK',
+                'name': "ALL MIGHTY SEVER",
+                'time': str(h) + ":" + str(m),
+                'message': '%s has disconnected' % nickname
             }
             self.broadcast_event('message', message)
             self.disconnect(silent=True)
@@ -147,8 +160,7 @@ class Room(BaseNamespace, RoomsMixin, BroadcastMixin):
         return True
 
 
-
-def checkUser(type ,value, table):
+def checkUser(type, value, table):
     result = ''
     if not value:
         return True
@@ -169,22 +181,24 @@ def checkUser(type ,value, table):
         else:
             return 'invalid'
 
+
 def getUserRank(user):
     result = database.User.query.all()
     avatar = ''
     for u in result:
         if u.username.lower() == user:
-            avatar = u.color+u.rank.title()
+            avatar = u.color + u.rank.title()
     return avatar
 
-def createRoom(creator,name):
+
+def createRoom(creator, name):
     hasher = hashlib.md5()
     hasher.update(creator)
     result = database.User.query.all()
     for u in result:
         if u.username.lower() == creator.lower():
             print name.lower()
-            room = database.Room(u.id,name,creator.lower(),str(hasher.hexdigest()),'')
+            room = database.Room(u.id, name, creator.lower(), str(hasher.hexdigest()), '')
             database.db.session.add(room)
             database.db.session.commit()
 
@@ -193,26 +207,33 @@ def deleteRoom(id):
     result = database.Room.query.all()
     for u in result:
         if u.id == id.lower():
-            room = database.Room(u.creator,u.name,u.players)
-            database.db.session.delete(room)
-            database.db.session.commit()
+            players = database.User.query.all()
+            for player in players:
+                if not notInArray(u.players.split(','), player.username):
+                    database.User.query.filter_by(username=player.username).update(
+                        dict(str(removeArrayItem(player.joinedRooms.split(','), u.roomHash))))
+                    database.db.session.commit()
+        database.Room.query.filter_by(id=id).first().delete()
+        database.db.session.commit()
 
-def playersInRoom(hash,name,names):
+
+def playersInRoom(hash, name, names):
     result = database.Room.query.all()
     if not names:
         for item in result:
-            if(item.roomHash == hash):
+            if (item.roomHash == hash):
                 amountPlayers = item.players.split(',')
                 if len(amountPlayers) == 2:
                     for players in amountPlayers:
                         if players.lower() == name.lower():
-                            return amountPlayers.index(players)+1
+                            return amountPlayers.index(players) + 1
                 else:
                     return 1
     else:
         for item in result:
-            if(item.roomHash == hash):
+            if (item.roomHash == hash):
                 return item.players
+
 
 def getRoomHashByUser(name):
     users = database.User.query.all()
@@ -229,14 +250,15 @@ def getRoomHashByUser(name):
     else:
         return "no room"
 
+
 def getRoomName(hash):
     result = database.Room.query.all()
     for item in result:
-        if(item.roomHash == hash):
+        if (item.roomHash == hash):
             return item.name
 
 
-def addPlayerToRoom(name,hash):
+def addPlayerToRoom(name, hash):
     print "TIME TO DO SOME STUFF RIGHT NAWH"
     print name
     users = database.User.query.all()
@@ -245,10 +267,16 @@ def addPlayerToRoom(name,hash):
             rooms = database.Room.query.all()
             for room in rooms:
                 if room.roomHash == hash:
-                        if notInArray(room.players.split(','), name):
-                            players = room.players+','+name
-                            database.Room.query.filter_by(roomHash=hash).update(dict(players=players))
-                            database.db.session.commit()
+                    if notInArray(user.joinedRooms.split(','), hash):
+                        database.User.query.filter_by(username=name).update(
+                            dict(joinedRooms=user.joinedRooms + ',' + hash))
+                        print "addingroom to user " + user.username + "room :" + hash
+                        database.db.session.commit()
+                    if notInArray(room.players.split(','), name):
+                        players = room.players + ',' + name
+                        database.Room.query.filter_by(roomHash=hash).update(dict(players=players))
+                        database.db.session.commit()
+
 
 def addRooms():
     global rooms
@@ -257,12 +285,12 @@ def addRooms():
     for room in result:
         name = database.User.query.filter_by(id=str(room.creator)).first()
         json = {
-            'creatorRank':getUserRank(name.username),
-            'creator':name.username,
+            'creatorRank': getUserRank(name.username),
+            'creator': name.username,
             'name': room.name,
             'players': len(room.players.split(',')),
             'inPlay': False,
-            'hash':getRoomHashByUser(name.username)
+            'hash': getRoomHashByUser(name.username)
         }
         list.append(json)
     rooms = list
@@ -277,11 +305,21 @@ def notInArray(list, value):
 
     return True
 
-def updateBoard(hash,data):
+
+def removeArrayItem(array, value):
+    newArray = array
+    for item in newArray:
+        if item == value:
+            newArray.remove(value)
+    return newArray
+
+
+def updateBoard(hash, data):
     result = database.Room.query.all()
     newData = ''
     database.Room.query.filter_by(roomHash=hash).update(dict(board=str(data)))
     database.db.session.commit()
+
 
 def returnBoard(hash):
     result = database.Room.query.all()
@@ -289,12 +327,36 @@ def returnBoard(hash):
         if item.roomHash.lower() == hash.lower():
             return item.board
 
+
 def returnTurn(hash):
     result = database.Room.query.all()
     for item in result:
         if item.roomHash.lower() == hash.lower():
             return item.turn
 
-def updateTurn(hash,turn):
+
+def updateTurn(hash, turn):
     database.Room.query.filter_by(roomHash=hash).update(dict(turn=str(turn)))
     database.db.session.commit()
+
+def updatePlayerScore(players,winner):
+    users = database.User.query.all()
+    print 'spelers die meedoen: '+players
+    players = players.split(',')
+    if winner == 'white':
+        wins = int(database.User.query.filter_by(username=players[0]).first().wins)+1
+        database.User.query.filter_by(username=players[0]).update(dict(wins=str(wins)))
+        loses = int(database.User.query.filter_by(username=players[1]).first().loses)+1
+        database.User.query.filter_by(username=players[1]).update(dict(loses=str(loses)))
+    elif winner == 'black':
+        wins = int(database.User.query.filter_by(username=players[1]).first().wins)+1
+        database.User.query.filter_by(username=players[1]).update(dict(wins=str(wins)))
+        loses = int(database.User.query.filter_by(username=players[0]).first().loses)+1
+        database.User.query.filter_by(username=players[0]).update(dict(loses=str(loses)))
+    database.db.session.commit()
+
+def getUserStats(name):
+    return {
+        'wins':database.User.query.filter_by(username=name).first().wins,
+        'loses':database.User.query.filter_by(username=name).first().loses
+    }

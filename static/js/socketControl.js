@@ -1,5 +1,7 @@
 socket.on('getTurn',function(data){
     console.log("test " + data)
+    var clickSound = new Audio("http://www.threecaster.com/wavy/radar1.wav");
+    clickSound.play();
     app.turn = data;
 })
 socket.on('redrawBoard',function(data){
@@ -53,16 +55,22 @@ socket.on('strikeEnemy',function(data){
 })
 
 
-socket.on("gameWon",function(data){
-    // shows player name in cool font
-    // dimmer with 2 buttons retry or quit
+socket.on('gameFinished',function(data){
+    if(app.team == data){
+        // winner show winner screen
+        document.write("player: "+data+" Won the game, GG WP")
+    }
+    else{
+        //loser screen
+        document.write("player: "+data+" Won the game, U suck")
 
-})
-socket.on("gameLost",function(data){
-    // shows player name in sad font
-    // dimmer with 2 buttons retry or quit
+    }
 })
 
 socket.on("getPlayHistory",function(data){
 
+})
+
+socket.on('promotePiece',function(data){
+    app.pieceSet[data['color']][data['id']].promote()
 })
