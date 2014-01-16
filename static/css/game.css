@@ -5,7 +5,7 @@ body{
 }
 #content{
 
-    margin-left: 25%;
+    margin-left: 36%;
 }
 
 #player{
@@ -16,6 +16,7 @@ body{
     width:100%;
     height:83%;
     overflow: hidden;
+    margin-left: 31px;
 }
 .horizontalDivider{
     border-bottom: 1px solid gray;
@@ -38,6 +39,7 @@ body{
     font-size: 1.2em;
     font-weight: bold;
     color:gray;
+    margin-left: 31px;
 
 }
 .topTitle{
@@ -59,6 +61,12 @@ body{
     border-top-left-radius: 10px;
     border-bottom-left-radius: 10px;
     background: url('http://fc04.deviantart.net/fs11/i/2006/240/7/a/Bg_Texture___wood_by_nortago.jpg');
+    z-index: -1;
+    position: absolute;
+    left: 278px;
+    overflow: hidden;
+    margin-top: 9px;
+    height: 584px;
 
 }
 #board{
@@ -75,4 +83,16 @@ body{
 }
 .hidden{
     display:none;
+}
+.sliderRectangle{
+    position: absolute;
+    float:left;
+    width:32px;
+    height:100%;
+    background: rgba(35, 15, 8, 0.45);
+}
+.sliderRectangle .openChat{
+    top: 43%;
+    color: rgba(155, 68, 20, 0.14);
+    position: absolute;
 }

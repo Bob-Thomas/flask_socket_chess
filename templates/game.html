@@ -2,6 +2,13 @@
 <html>
 <head>
     <title>THA GAME</title>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap-theme.min.css">
+
+    <!-- Latest compiled and minified JavaScript -->
     <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/game.css">
 
@@ -11,14 +18,16 @@
 <div id="player">{{user}}</div>
 <div id="rank">{{avatar}}</div>
 <div class="loader"><i class="fa fa-cog fa-5x fa-spin"></i></div>
+
 <div id="content" class="hidden">
     <div id="chat" class="rectangle messageBox">
+        <div class="sliderRectangle chatSlider">
+            <i class="fa fa-4x fa-angle-right openChat"></i>
+        </div>
         <div class="information topTitle">{{players}}</div>
         <div class="messages">
-
-
         </div>
-        <input type="text" class="chatInput">
+            <input type="text" class="chatInput">
     </div>
     <div id="board">
         <canvas id = 'canvas' width="600px" height="600px"></canvas>
