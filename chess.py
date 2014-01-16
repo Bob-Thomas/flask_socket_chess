@@ -129,6 +129,15 @@ def register(username, pw, repeat, email):
         return True
 
 
+
+@app.teardown_request
+def checkin_db(exc):
+    try:
+        database.db.session.close()
+    except AttributeError:
+        pass
+
+
 @app.route("/socket.io/<path:path>")
 def run_socketio(path):
     import sockets
@@ -146,5 +155,5 @@ if __name__ == '__main__':
         })
     from socketio.server import SocketIOServer
     SocketIOServer(('0.0.0.0', port), app, namespace="socket.io", policy_server=False).serve_forever()
-    
+
 
