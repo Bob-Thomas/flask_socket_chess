@@ -5,7 +5,7 @@ body{
 }
 #content{
 
-    margin-left: 36%;
+    margin-left: 15%;
 }
 
 #player{
@@ -61,15 +61,15 @@ body{
     border-top-left-radius: 10px;
     border-bottom-left-radius: 10px;
     background: url('http://fc04.deviantart.net/fs11/i/2006/240/7/a/Bg_Texture___wood_by_nortago.jpg');
-    z-index: -1;
-    position: absolute;
-    left: 278px;
+    position: relative;
     overflow: hidden;
     margin-top: 9px;
     height: 584px;
+    z-index: -1;
 
 }
 #board{
+    z-index: 2;
     float:left;
     width:600px;
     height:600px;

@@ -15,7 +15,6 @@ app.chatControl = function(){
         ;
 
     app.chatMessages = []
-    messageContainer.style.left = '278';
     input.addEventListener('keydown',function(event){sendmessage(event)})
     slideChat.addEventListener('click',function(){openCloseMessageBox(slideAction)})
 
@@ -72,8 +71,8 @@ app.chatControl = function(){
                 sliderLeft += 4;
                 messageContainer.style.left = (sliderLeft) +"px"
                 console.log(messageContainer.style.left)
-                if(sliderLeft >= board.offsetWidth - 53){
-                    messageContainer.offsetLeft = board.offsetWidth - (board.offsetWidth-54);
+                if(sliderLeft >= board.offsetWidth - 330){
+                    messageContainer.offsetLeft = board.offsetWidth - (board.offsetWidth-330);
                     slideAction = 'open'
                     document.querySelectorAll('.openChat')[0].className = document.querySelectorAll('.openChat')[0].className.replace('right','left')
                     clearInterval(timer)
@@ -84,8 +83,8 @@ app.chatControl = function(){
             timer = setInterval(function(){
                 sliderLeft -= 4;
                 messageContainer.style.left = (sliderLeft)+"px"
-                if(sliderLeft <= 278){
-                    messageContainer.style.left = 278;
+                if(sliderLeft <= 0){
+                    messageContainer.style.left = 0;
                     slideAction = 'close'
                     document.querySelectorAll('.openChat')[0].className = document.querySelectorAll('.openChat')[0].className.replace('left','right')
                     clearInterval(timer)
