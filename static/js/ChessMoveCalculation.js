@@ -81,6 +81,32 @@ app.MoveValidation.prototype.Lightpath = function LightPath(tiles,piece,canJump)
                         tileItem = [tiles[tileList][tile][0],tiles[tileList][tile][1]]
                         if(clickedPos[0] === tileItem[0] && clickedPos[1] === tileItem[1] && app.pieceClicked(tileItem,'checks') == 'empty' ){
                             app.selectedPiece = null;
+                            if(piece.getId()[1] == 'P'){
+                                if(piece.getEnpasStrike()){
+                                    console.log("you moved u bastard")
+                                    delete app.pieceSet[app.team][piece.getId()+piece.getId()[2]]
+                                    socket.emit('removeDummy',{
+                                        team:app.team,
+                                        id:piece.getId()+piece.getId()[2],
+                                        position:[piece.getposition()[0]-1,piece.getposition()[1]]
+                                    })
+                                    piece.setEnpasStrike(false)
+                                }
+                                if(piece.getposition()[0]-2 == clickedPos[0]){
+                                    app.pieceSet[app.team][piece.getId()+piece.getId()[2]] = new app.Pawn(  [piece.getposition()[0]-1,piece.getposition()[1]],piece.getId()[0]+'P',piece.getId()+piece.getId()[2])
+                                    app.pieceSet[app.team][piece.getId()+piece.getId()[2]].setAlive(false)
+                                    socket.emit('addDummy',{
+                                        team:app.team,
+                                        id:piece.getId()+piece.getId()[2],
+                                        position:[piece.getposition()[0]-1,piece.getposition()[1]]
+                                    })
+                                    piece.setEnpasStrike(true)
+
+                                }
+
+
+
+                            }
                             piece.setPosition(tileItem)
                             app.turn = app.enemy
                             socket.emit("updateBoard",{
@@ -123,6 +149,22 @@ app.MoveValidation.prototype.Lightpath = function LightPath(tiles,piece,canJump)
                                 if(clickedPos[1] == enemyX && clickedPos[0] == enemyY){
                                     enemyPiece.setAlive(false)
                                     enemyPiece.setPosition([-1,-1])
+                                    console.log(enemyPiece.getId().length)
+                                    if(enemyPiece.getId().length == 4){
+                                        console.log('deleted THE REAL PIECE')
+                                        app.pieceSet[app.enemy][enemyPiece.getId()[0]+enemyPiece.getId()[1]+enemyPiece.getId()[2]].setAlive(false)
+                                        app.pieceSet[app.enemy][enemyPiece.getId()[0]+enemyPiece.getId()[1]+enemyPiece.getId()[2]].setPosition([-1,-1])
+                                        socket.emit('removeDummy',{
+                                            team:app.team,
+                                            id:piece.getId()+enemyPiece.getId()[2],
+                                            position:[enemyPiece.getposition()[0]+1,enemyPiece.getposition()[1]]
+                                        })
+                                        socket.emit('removeDummy',{
+                                            team:app.team,
+                                            id:enemyPiece.getId()[0]+enemyPiece.getId()[1]+enemyPiece.getId()[2],
+                                            position:[enemyPiece.getposition()[0],enemyPiece.getposition()[1]]
+                                        })
+                                    }
                                     piece.setPosition(tileItem)
                                     socket.emit('strikePiece',{
                                             enemy:enemyPiece.getId(),

@@ -43,6 +43,14 @@ app.Piece.prototype.getAlive = function(){
 app.Pawn = function Pawn(){
     app.Piece.apply(this, arguments);
     this.enpasent = true;
+    this.enpasStrike = false;
+    this.setEnpasStrike = function(val){
+        this.enpasStrike = val;
+    }
+
+    this.getEnpasStrike = function(){
+        return this.enpasStrike
+    }
     this.getEnpasent = function() {
         return this.enpasent
     }

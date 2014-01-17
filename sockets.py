@@ -42,6 +42,12 @@ class Room(BaseNamespace, RoomsMixin, BroadcastMixin):
         self.emit_to_room(self.socket.session['room'], 'gameFinished',data)
         self.emit('gameFinished',data)
 
+    def on_addDummy(self,data):
+        self.emit_to_room(self.socket.session['room'], 'addDummy', data)
+
+    def on_removeDummy(self,data):
+        self.emit_to_room(self.socket.session['room'], 'removeDummy', data)
+
 
     def on_movePiece(self, data):
         self.emit_to_room(self.socket.session['room'], 'moveEnemy', data)

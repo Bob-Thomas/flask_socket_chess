@@ -74,3 +74,13 @@ socket.on("getPlayHistory",function(data){
 socket.on('promotePiece',function(data){
     app.pieceSet[data['color']][data['id']].promote()
 })
+
+socket.on('addDummy',function(data){
+    app.pieceSet[data['team']][data['id']] = new app.Pawn(data['position'],data['id']+'P',data['id'])
+    app.pieceSet[data['team']][data['id']].setAlive(false)
+})
+
+socket.on('removeDummy',function(data){
+    console.log('deleted')
+    app.pieceSet[data['team']][data['id']].setPosition([-1,-1])
+})
