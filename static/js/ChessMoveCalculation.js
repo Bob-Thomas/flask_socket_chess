@@ -155,12 +155,12 @@ app.MoveValidation.prototype.Lightpath = function LightPath(tiles,piece,canJump)
                                         app.pieceSet[app.enemy][enemyPiece.getId()[0]+enemyPiece.getId()[1]+enemyPiece.getId()[2]].setAlive(false)
                                         app.pieceSet[app.enemy][enemyPiece.getId()[0]+enemyPiece.getId()[1]+enemyPiece.getId()[2]].setPosition([-1,-1])
                                         socket.emit('removeDummy',{
-                                            team:app.team,
-                                            id:piece.getId()+enemyPiece.getId()[2],
+                                            team:app.enemy,
+                                            id:piece.getId(),
                                             position:[enemyPiece.getposition()[0]+1,enemyPiece.getposition()[1]]
                                         })
                                         socket.emit('removeDummy',{
-                                            team:app.team,
+                                            team:app.enemy,
                                             id:enemyPiece.getId()[0]+enemyPiece.getId()[1]+enemyPiece.getId()[2],
                                             position:[enemyPiece.getposition()[0],enemyPiece.getposition()[1]]
                                         })
