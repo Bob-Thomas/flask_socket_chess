@@ -73,6 +73,9 @@ app.pieceClicked = function(position){
                 return "enemy";
 
             }
+            if(arguments.length == 3){
+                return piece
+            }
         }
 
     }

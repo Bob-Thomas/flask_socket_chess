@@ -4,6 +4,8 @@ app.Piece = function Piece(position, type, id,color){
     this.id = id;
     this.color = color;
     this.alive = true;
+    this.dummy = false;
+
 };
 //app.Piece.prototype.color = function(color){this.color=color};
 app.Piece.prototype.setPosition = function(position){
@@ -39,11 +41,19 @@ app.Piece.prototype.setAlive = function(alive){
 app.Piece.prototype.getAlive = function(){
     return this.alive
 }
+app.Piece.prototype.getDummy = function(){
+    return this.dummy
+}
 
 app.Pawn = function Pawn(){
     app.Piece.apply(this, arguments);
     this.enpasent = true;
     this.enpasStrike = false;
+    console.log("WHAT AM I : " +this.id.length)
+    if(this.id.length > 3){
+        console.log(this.id + " i am a dummy")
+        this.dummy = true;
+    }
     this.setEnpasStrike = function(val){
         this.enpasStrike = val;
     }
@@ -60,6 +70,7 @@ app.Pawn = function Pawn(){
         app.pieceSet[this.color][this.id[0]+'Q'+this.id[2]] = new app.Queen([0,this.position[1]],this.id[0]+"Q",this.id[0]+"Q"+this.id[2],this.color)
 
     }
+
 
 };
 

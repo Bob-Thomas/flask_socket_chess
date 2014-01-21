@@ -19,6 +19,17 @@ app.helper.inherit = function inherit(proto){
     return new F()
 }
 
+app.helper.clearDummy = function(team){
+        for(var object in app.pieceSet[team]){
+            var piece = app.pieceSet[team][object]
+                if(piece.getDummy() === true){
+                    piece.setPosition([-1,-1])
+                    delete piece
+                }
+
+        }
+
+}
 
 app.helper.parseBoard = function parseBoard(build,team,firstLoad){
     var board
@@ -90,6 +101,11 @@ app.helper.parseBoard = function parseBoard(build,team,firstLoad){
                             ;
                         if(newBoard[i][j] == piece.getId()){
                             piece.setPosition([i,j])
+                        }
+                        if(newBoard[i][j].length > 3){
+                            // dummy code
+                            app.pieceSet[app.team][newBoard[i][j]] = new app.Pawn(  [newBoard[i],newBoard[j]],newBoard[i][j][0]+'P',newBoard[i][j],'','dummy')
+                            app.pieceSet[app.team][newBoard[i][j]].setAlive(false)
                         }
                     }
                 }

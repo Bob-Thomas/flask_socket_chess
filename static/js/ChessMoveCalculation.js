@@ -3,6 +3,10 @@ app.MoveValidation = function MoveValidation(piece,clickPosition){
     this.clickPosition = clickPosition;
 };
 
+
+
+
+
 app.MoveValidation.prototype.Lightpath = function LightPath(tiles,piece,canJump){
     var tileList,
         tile,
@@ -70,7 +74,8 @@ app.MoveValidation.prototype.Lightpath = function LightPath(tiles,piece,canJump)
             tiles,
             ctx = app.init.ctx
         ;
-        var strikeCoords;
+        var strikeCoords,
+            oldPos = piece.getposition();
         tiles = steps.move;
         strikeCoords = steps.strike;
         if(piece){
@@ -79,7 +84,7 @@ app.MoveValidation.prototype.Lightpath = function LightPath(tiles,piece,canJump)
                 for(tile = 0; tile < tiles[tileList].length; tile++){
                     if(tiles[tileList][tile][0]+65 >= 65){
                         tileItem = [tiles[tileList][tile][0],tiles[tileList][tile][1]]
-                        if(clickedPos[0] === tileItem[0] && clickedPos[1] === tileItem[1] && app.pieceClicked(tileItem,'checks') == 'empty' ){
+                        if(clickedPos[0] === tileItem[0] && clickedPos[1] === tileItem[1] && app.pieceClicked(tileItem,'checks') == 'empty'){
                             app.selectedPiece = null;
                             if(piece.getId()[1] == 'P'){
                                 if(piece.getEnpasStrike()){
@@ -93,7 +98,7 @@ app.MoveValidation.prototype.Lightpath = function LightPath(tiles,piece,canJump)
                                     piece.setEnpasStrike(false)
                                 }
                                 if(piece.getposition()[0]-2 == clickedPos[0]){
-                                    app.pieceSet[app.team][piece.getId()+piece.getId()[2]] = new app.Pawn(  [piece.getposition()[0]-1,piece.getposition()[1]],piece.getId()[0]+'P',piece.getId()+piece.getId()[2])
+                                    app.pieceSet[app.team][piece.getId()+piece.getId()[2]] = new app.Pawn(  [piece.getposition()[0]-1,piece.getposition()[1]],piece.getId()[0]+'P',piece.getId()+piece.getId()[2],'','dummy')
                                     app.pieceSet[app.team][piece.getId()+piece.getId()[2]].setAlive(false)
                                     socket.emit('addDummy',{
                                         team:app.team,
@@ -112,7 +117,9 @@ app.MoveValidation.prototype.Lightpath = function LightPath(tiles,piece,canJump)
                             socket.emit("updateBoard",{
                                 hash:window.location.href.toString().split('/')[4],
                                 board:app.helper.parseBoard(),
-                                team:app.team
+                                team:app.team,
+                                newPos:tileItem,
+                                oldPos:oldPos
                             })
                             socket.emit('turnOver',{
                                 turn:app.turn,
@@ -130,6 +137,8 @@ app.MoveValidation.prototype.Lightpath = function LightPath(tiles,piece,canJump)
                                 piece.enpasent = false;
                             }
                             app.render()
+                            app.MoveValidation.prototype.showHistory(oldPos,tileItem,'normal')
+
                         }
 
                     }
@@ -191,17 +200,22 @@ app.MoveValidation.prototype.Lightpath = function LightPath(tiles,piece,canJump)
                                     socket.emit("updateBoard",{
                                         hash:window.location.href.toString().split('/')[4],
                                         board:app.helper.parseBoard(),
-                                        team:app.team
+                                        team:app.team,
+                                        newPos:tileItem,
+                                        oldPos:oldPos
                                     })
                                     app.turn = app.enemy
                                     socket.emit('turnOver',{
                                             turn:app.turn,
-                                            hash:window.location.href.toString().split('/')[4]}
+                                            hash:window.location.href.toString().split('/')[4]
+                                        }
                                     )
+                                    app.selectedPiece = undefined;
+                                    app.render();
+                                    app.MoveValidation.prototype.showHistory(oldPos,tileItem,'normal');
                                 }
 
-                                app.selectedPiece = undefined
-                                app.render()
+
 
                             }
 
@@ -232,12 +246,12 @@ app.MoveValidation.prototype.CheckStrikeAble =  function CheckStrikeAble(strikeC
         for(checks = 0; checks < strikeCoords[list].length; checks++)
             if(65+strikeCoords[list][checks][0] >= 65){
                 tileItem = [strikeCoords[list][checks][0],strikeCoords[list][checks][1]]
-                if(app.pieceClicked(tileItem,"check") === "player"){
+                if(app.pieceClicked(tileItem,"check") === "player" && app.pieceClicked(tileItem,'check','return').getDummy() == false){
 
                     ctx.beginPath();
                     ctx.rect(tileItem[1]*75,tileItem[0]*75,75,75);
                     ctx.globalAlpha = 0.5;
-                    ctx.fillStyle = 'green';
+                    ctx.fillStyle = 'red';
                     ctx.fill();
                     ctx.stroke();
                     ctx.restore();
@@ -263,6 +277,40 @@ app.MoveValidation.prototype.CheckStrikeAble =  function CheckStrikeAble(strikeC
 
             }
     }
+}
+
+app.MoveValidation.prototype.showHistory = function showHistory(oldPos,newPos){
+    var tileList,
+        tile,
+        tileItem,
+        color,
+        ctx = app.init.ctx;
+    console.log("movu des")
+    if(arguments.length == 2){
+        if(app.enemy == 'black'){
+            oldPos[1] = 7-oldPos[1]
+            oldPos[0] = 7-oldPos[0]
+            newPos[1] = 7-newPos[1]
+            newPos[0] = 7-newPos[0]
+        }else{
+            oldPos[1] = 7+-oldPos[1]
+            oldPos[0] = 7+-oldPos[0]
+            newPos[1] = 7+-newPos[1]
+            newPos[0] = 7+-newPos[0]
+        }
+    }
+    ctx.beginPath();
+    ctx.rect(oldPos[1]*75,oldPos[0]*75,75,75);
+    ctx.globalAlpha = 0.5;
+    ctx.fillStyle = 'purple';
+    ctx.fill();
+    ctx.stroke();
+    ctx.restore();
+    ctx.rect(newPos[1]*75,newPos[0]*75,75,75);
+    ctx.fillStyle = 'purple';
+    ctx.fill();
+    ctx.stroke();
+    ctx.restore();
 }
 
 app.ValidatePawn = function ValidatePawn(){

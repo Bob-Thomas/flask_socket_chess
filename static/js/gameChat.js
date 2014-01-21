@@ -10,10 +10,9 @@ app.chatControl = function(){
         avatar = document.getElementById('rank').innerHTML,
         slideChat = document.querySelectorAll('.chatSlider')[0],
         slideAction = 'close',
-        sliderLeft = messageContainer.offsetLeft
+        sliderLeft = 0
 
         ;
-
     app.chatMessages = []
     input.addEventListener('keydown',function(event){sendmessage(event)})
     slideChat.addEventListener('click',function(){openCloseMessageBox(slideAction)})

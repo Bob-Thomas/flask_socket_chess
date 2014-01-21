@@ -3,11 +3,17 @@ socket.on('getTurn',function(data){
     var clickSound = new Audio("http://www.threecaster.com/wavy/radar1.wav");
     clickSound.play();
     app.turn = data;
+
 })
 socket.on('redrawBoard',function(data){
+    app.helper.clearDummy(app.enemy)
     app.helper.parseBoard(data['board'],data['team'])
     app.render()
-
+    console.log("history gogogo")
+    console.log(data)
+    if(data['oldPos']){
+        app.MoveValidation.prototype.showHistory(data['oldPos'],data['newPos'])
+    }
 })
 socket.on('moveEnemy',function(data){
     console.log("move")
@@ -76,7 +82,7 @@ socket.on('promotePiece',function(data){
 })
 
 socket.on('addDummy',function(data){
-    app.pieceSet[data['team']][data['id']] = new app.Pawn(data['position'],data['id']+'P',data['id'])
+    app.pieceSet[data['team']][data['id']] = new app.Pawn(data['position'],data['id']+'P',data['id'],'','dummy')
     app.pieceSet[data['team']][data['id']].setAlive(false)
 })
 
