@@ -7,3 +7,13 @@
 
 <h3> This is the login screen i am working on its socket validated and databound with angular.js </h3>
 
+
+
+
+<img src="http://puu.sh/6u6PN/d5f6381650.jpg" width='600' height='400'>
+
+
+<h3> Chess game is functional only missing some rules and checks </h3>
+
+
+<h4> But its Playable </h4>
