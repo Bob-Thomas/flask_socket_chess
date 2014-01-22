@@ -1,7 +1,6 @@
 socket.on('getTurn',function(data){
     console.log("test " + data)
-    var clickSound = new Audio("http://www.threecaster.com/wavy/radar1.wav");
-    clickSound.play();
+    app.soundManager().playS
     app.turn = data;
 
 })

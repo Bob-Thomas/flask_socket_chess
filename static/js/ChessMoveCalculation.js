@@ -18,6 +18,7 @@ app.MoveValidation.prototype.Lightpath = function LightPath(tiles,piece,canJump)
         for(tile = 0; tile < tiles[tileList].length; tile++){
             if(tiles[tileList][tile][0]+65 >= 65){
                 tileItem = [tiles[tileList][tile][0],tiles[tileList][tile][1]]
+
                 if(app.pieceClicked(tileItem,"check") === "empty"){
 
 //                    $(tileItem).prepend("<div class='overlayTile'></div>")
@@ -47,6 +48,10 @@ app.MoveValidation.prototype.Lightpath = function LightPath(tiles,piece,canJump)
                 if(app.pieceClicked(tileItem,"check") === "enemy"){
 //                    $(tileItem).prepend("<div style='position:absolute' class='overlayTile blocked'></div>")
                     console.log("path lighted RED")
+                    if(app.pieceClicked(tileItem,'check','return').getId() === app.enemy[0]+"K"){
+
+                        return
+                    }
                     ctx.beginPath();
                     ctx.rect(tileItem[1]*75,tileItem[0]*75,75,75);
                     ctx.globalAlpha = 0.5;
@@ -84,7 +89,7 @@ app.MoveValidation.prototype.Lightpath = function LightPath(tiles,piece,canJump)
                 for(tile = 0; tile < tiles[tileList].length; tile++){
                     if(tiles[tileList][tile][0]+65 >= 65){
                         tileItem = [tiles[tileList][tile][0],tiles[tileList][tile][1]]
-                        if(clickedPos[0] === tileItem[0] && clickedPos[1] === tileItem[1] && app.pieceClicked(tileItem,'checks') == 'empty'){
+                        if(clickedPos[0] === tileItem[0] && clickedPos[1] === tileItem[1] && app.pieceClicked(tileItem,'checks') == 'empty' && (app.gameState.getState != 'incheck' || app.gameState.getState != 'checkmate') ){
                             app.selectedPiece = null;
                             if(piece.getId()[1] == 'P'){
                                 if(piece.getEnpasStrike()){
@@ -246,6 +251,7 @@ app.MoveValidation.prototype.CheckStrikeAble =  function CheckStrikeAble(strikeC
         for(checks = 0; checks < strikeCoords[list].length; checks++)
             if(65+strikeCoords[list][checks][0] >= 65){
                 tileItem = [strikeCoords[list][checks][0],strikeCoords[list][checks][1]]
+
                 if(app.pieceClicked(tileItem,"check") === "player" && app.pieceClicked(tileItem,'check','return').getDummy() == false){
 
                     ctx.beginPath();
@@ -261,18 +267,27 @@ app.MoveValidation.prototype.CheckStrikeAble =  function CheckStrikeAble(strikeC
 
                 }
                 else if(app.pieceClicked(tileItem,"check") === "enemy"){
+                    console.log(tileItem)
+                    console.log(app.pieceClicked(tileItem,'check','return'))
                     ctx.beginPath();
                     ctx.rect(tileItem[1]*75,tileItem[0]*75,75,75);
                     ctx.globalAlpha = 0.5;
-                    ctx.fillStyle = 'orange';
+                    ctx.fillStyle = 'yellow';
                     ctx.fill();
                     ctx.stroke();
                     ctx.restore();
+                    if(app.pieceClicked(tileItem,'check','return').getId() === app.enemy[0]+"K"){
+                        console.log("CHECKES")
+                        app.soundManager.checkMate;
+                        return
+                    }
                     if(canJump === false && direction === "axes"){
                         break;
                     }
 
                 }
+
+
 
 
             }
@@ -313,476 +328,419 @@ app.MoveValidation.prototype.showHistory = function showHistory(oldPos,newPos){
     ctx.restore();
 }
 
-app.ValidatePawn = function ValidatePawn(){
+app.ValidateMovement = function ValidateMovement(){
     app.MoveValidation.apply(this,arguments)
-    var maxSteps,
-        position,
+    var
+        maxSteps,
         tiles= [],
         list = [],
         steps,
-        color,
         coord,
         strikeCoords  = [],
-        color = this.piece.getColor();
+        color = this.piece.getColor(),
+        uR,
+        uL,
+        dR,
+        dL,
+        nextPosition,
+        u,
+        d,
+        l,
+        r,
+        upRight = [],
+        upLeft = [],
+        downRight = [],
+        downLeft = [],
+        up = [],
+        down = [],
+        left = [],
+        right = [],
+        position = this.piece.position,
+        y = parseInt(position[0]),
+        x = parseInt(position[1])
 
-    if(this.piece.getEnpasent() == true){
-        maxSteps = 2;
-    }
-    else{
-        maxSteps = 1;
-    }
-    if(this.piece.inBounds(this.piece.getposition())){
-        position = this.piece.getposition();
-        position[0] = parseInt(position[0]);
-        position[1] = parseInt(position[1]);
-        coord = [position[0],position[1]]
-        strikeCoords.push( [ [ coord[0]-1,(coord[1]+1)],[coord[0]-1,(coord[1]-1) ] ] )
+    ;
 
-        for(steps = 0; steps < maxSteps; steps+=1){
-            tiles.push([ (position[0]-1)-steps,position[1] ])
+    switch(this.piece.getId()[1]){
+
+        case 'P':
+            if(this.piece.getEnpasent() == true){
+                maxSteps = 2;
+            }
+            else{
+                maxSteps = 1;
+            }
+            if(this.piece.inBounds(this.piece.getposition())){
+                position = this.piece.getposition();
+                position[0] = parseInt(position[0]);
+                position[1] = parseInt(position[1]);
+                coord = [position[0],position[1]]
+                strikeCoords.push( [ [ coord[0]-1,(coord[1]+1)],[coord[0]-1,(coord[1]-1) ] ] )
+
+                for(steps = 0; steps < maxSteps; steps+=1){
+                    tiles.push([ (position[0]-1)-steps,position[1] ])
+
+                }
+                list.push(tiles)
+                if(arguments.length == 1){
+                    app.MoveValidation.prototype.Lightpath(list,this.piece,false)
+                    app.MoveValidation.prototype.CheckStrikeAble(strikeCoords,this.piece,false,'diagonal')
+
+                }
+
+                return {
+                    tiles:{
+                        move:list,
+                        strike:strikeCoords
+                    }
+                }
+
+            }
+            break;
+        case 'R':
+
+
+        for(u = y; u > 0; u-=1){
+            nextPosition = [ u-1,position[1] ];
+            if(app.pieceClicked(nextPosition,'checks') == "empty" ){
+                up.push(nextPosition)
+            }else if(app.pieceClicked(nextPosition,'checks') == "enemy" || app.pieceClicked(nextPosition,'checks') == "player"){
+                up.push(nextPosition)
+                console.log('breaku des')
+                break;
+
+            }
 
         }
-        list.push(tiles)
-        if(arguments.length == 1){
+        for(d = y; d <= 7; d+=1 )  {
+            nextPosition = [ d+1,position[1] ]
+            if(app.pieceClicked(nextPosition,'checks') == "empty" ){
+                down.push(nextPosition)
+            }else if(app.pieceClicked(nextPosition,'checks') == "enemy" || app.pieceClicked(nextPosition,'checks') == "player"){
+                down.push(nextPosition)
+                console.log('breaku des')
+                break;
+
+            }
+        }
+
+        for(l = x; l > 0; l-=1){
+            nextPosition = [position[0],l-1 ]
+            if(app.pieceClicked(nextPosition,'checks') == "empty" ){
+                left.push(nextPosition)
+            }else if(app.pieceClicked(nextPosition,'checks') == "enemy" || app.pieceClicked(nextPosition,'checks') == "player"){
+                left.push(nextPosition)
+                console.log('breaku des')
+                break;
+
+            }
+        }
+        for(r = x; r <= 7; r+=1 )  {
+            nextPosition = [position[0],r+1 ]
+
+            if(app.pieceClicked(nextPosition,'checks') == "empty" ){
+                right.push(nextPosition)
+            }else if(app.pieceClicked(nextPosition,'checks') == "enemy" || app.pieceClicked(nextPosition,'checks') == "player"){
+                right.push(nextPosition)
+                console.log('breaku des')
+                break;
+
+            }
+        }
+
+
+        coord = [parseInt(position[0]),parseInt(position[1])]
+        list.push(up);
+        list.push(down);
+        list.push(left);
+        list.push(right);
+
+        if(arguments.length === 1){
             app.MoveValidation.prototype.Lightpath(list,this.piece,false)
-            app.MoveValidation.prototype.CheckStrikeAble(strikeCoords,this.piece,false,'diagonal')
+            app.MoveValidation.prototype.CheckStrikeAble(list,this.piece,false,"axes")
+
+
+        }
+        return {
+            tiles:{
+                move:list,
+                strike:list
+            }
+        }
+
+    break;
+
+        case 'B':
+
+            position = this.piece.position;
+            y = parseInt(position[0]);
+            x = parseInt(position[1]);
+        for(uR = y; uR > 0; uR-=1){
+            nextPosition = [ uR-1,x+(y-uR)+1 ];
+            if(app.pieceClicked(nextPosition,'checks') == "empty" ){
+                upRight.push(nextPosition)
+            }else if(app.pieceClicked(nextPosition,'checks') == "enemy" || app.pieceClicked(nextPosition,'checks') == "player"){
+                upRight.push(nextPosition)
+                console.log('breaku des')
+                break;
+
+            }
+        }
+        for(uL = y; uL > 0; uL-=1){
+            nextPosition =[ uL-1,x-(y-uL)-1 ]
+            if(app.pieceClicked(nextPosition,'checks') == "empty" ){
+                upLeft.push(nextPosition)
+            }else if(app.pieceClicked(nextPosition,'checks') == "enemy" || app.pieceClicked(nextPosition,'checks') == "player"){
+                upLeft.push(nextPosition)
+                console.log('breaku des')
+                break;
+
+            }
+
+        }
+
+        for(dR = y; dR < 7; dR+=1){
+            nextPosition = [ dR+1,x+(y-dR)-1 ]
+            if(app.pieceClicked(nextPosition,'checks') == "empty" ){
+                downRight.push(nextPosition)
+            }else if(app.pieceClicked(nextPosition,'checks') == "enemy" || app.pieceClicked(nextPosition,'checks') == "player"){
+                downRight.push(nextPosition)
+                console.log('breaku des')
+                break;
+
+            }
+
+        }
+        for(dL = y; dL < 7; dL+=1){
+            nextPosition = [ dL+1,x-(y-dL)+1 ]
+            if(app.pieceClicked(nextPosition,'checks') == "empty" ){
+                downLeft.push(nextPosition)
+            }else if(app.pieceClicked(nextPosition,'checks') == "enemy" || app.pieceClicked(nextPosition,'checks') == "player"){
+                downLeft.push(nextPosition)
+                console.log('breaku des')
+                break;
+
+            }
+        }
+
+
+        list.push(upRight);
+        list.push(upLeft);
+        list.push(downRight);
+        list.push(downLeft);
+
+        if(arguments.length === 1){
+
+            app.MoveValidation.prototype.Lightpath(list,this.piece,false)
+            app.MoveValidation.prototype.CheckStrikeAble(list,this.piece,false,"diagonal")
+
+
+
+        }
+        return {
+            tiles:{
+                move:list,
+                strike:list
+            }
+        }
+            break;
+        case 'Q':
+
+
+
+        for(u = y; u > 0; u-=1){
+            nextPosition = [ u-1,position[1] ];
+            if(app.pieceClicked(nextPosition,'checks') == "empty" ){
+                up.push(nextPosition)
+            }else if(app.pieceClicked(nextPosition,'checks') == "enemy" || app.pieceClicked(nextPosition,'checks') == "player"){
+                up.push(nextPosition)
+                console.log('breaku des')
+                break;
+
+            }
+
+        }
+        for(d = y; d <= 7; d+=1 )  {
+            nextPosition = [ d+1,position[1] ]
+            if(app.pieceClicked(nextPosition,'checks') == "empty" ){
+                down.push(nextPosition)
+            }else if(app.pieceClicked(nextPosition,'checks') == "enemy" || app.pieceClicked(nextPosition,'checks') == "player"){
+                down.push(nextPosition)
+                console.log('breaku des')
+                break;
+
+            }
+        }
+
+        for(l = x; l > 0; l-=1){
+            nextPosition = [position[0],l-1 ]
+            if(app.pieceClicked(nextPosition,'checks') == "empty" ){
+                left.push(nextPosition)
+            }else if(app.pieceClicked(nextPosition,'checks') == "enemy" || app.pieceClicked(nextPosition,'checks') == "player"){
+                left.push(nextPosition)
+                console.log('breaku des')
+                break;
+
+            }
+        }
+        for(r = x; r <= 7; r+=1 )  {
+            nextPosition = [position[0],r+1 ]
+
+            if(app.pieceClicked(nextPosition,'checks') == "empty" ){
+                right.push(nextPosition)
+            }else if(app.pieceClicked(nextPosition,'checks') == "enemy" || app.pieceClicked(nextPosition,'checks') == "player"){
+                right.push(nextPosition)
+                console.log('breaku des')
+                break;
+
+            }
+        }
+
+        for(uR = y; uR > 0; uR-=1){
+            nextPosition = [ uR-1,x+(y-uR)+1 ];
+            if(app.pieceClicked(nextPosition,'checks') == "empty" ){
+                upRight.push(nextPosition)
+            }else if(app.pieceClicked(nextPosition,'checks') == "enemy" || app.pieceClicked(nextPosition,'checks') == "player"){
+                upRight.push(nextPosition)
+                console.log('breaku des')
+                break;
+
+            }
+        }
+        for(uL = y; uL > 0; uL-=1){
+            nextPosition =[ uL-1,x-(y-uL)-1 ]
+            if(app.pieceClicked(nextPosition,'checks') == "empty" ){
+                upLeft.push(nextPosition)
+            }else if(app.pieceClicked(nextPosition,'checks') == "enemy" || app.pieceClicked(nextPosition,'checks') == "player"){
+                upLeft.push(nextPosition)
+                console.log('breaku des')
+                break;
+
+            }
+
+        }
+
+        for(dR = y; dR < 7; dR+=1){
+            nextPosition = [ dR+1,x+(y-dR)-1 ]
+            if(app.pieceClicked(nextPosition,'checks') == "empty" ){
+                downRight.push(nextPosition)
+            }else if(app.pieceClicked(nextPosition,'checks') == "enemy" || app.pieceClicked(nextPosition,'checks') == "player"){
+                downRight.push(nextPosition)
+                console.log('breaku des')
+                break;
+
+            }
+
+        }
+        for(dL = y; dL < 7; dL+=1){
+            nextPosition = [ dL+1,x-(y-dL)+1 ]
+            if(app.pieceClicked(nextPosition,'checks') == "empty" ){
+                downLeft.push(nextPosition)
+            }else if(app.pieceClicked(nextPosition,'checks') == "enemy" || app.pieceClicked(nextPosition,'checks') == "player"){
+                downLeft.push(nextPosition)
+                console.log('breaku des')
+                break;
+
+            }
+        }
+
+
+
+        list.push(up);
+        list.push(down);
+        list.push(left);
+        list.push(right);
+
+        list.push(upRight);
+        list.push(upLeft);
+        list.push(downRight);
+        list.push(downLeft);
+
+        if(arguments.length === 1){
+
+
+            app.MoveValidation.prototype.Lightpath(list,this.piece,false)
+            app.MoveValidation.prototype.CheckStrikeAble(list,this.piece,false,"axes")
+
 
         }
 
         return {
+            move:list,
+            strike:list
+        }
+    break;
+        case 'K':
+
+
+        position = this.piece.getposition();
+        position[0] = parseInt(position[0]);
+        position[1] = parseInt(position[1]);
+        if(position[0]-1 >= 0){
+            up.push([ position[0]-1,position[1]  ]);
+            upRight.push([ position[0]-1,position[1]+1  ]);
+            upLeft.push([ position[0]-1,position[1]-1  ]);
+        }
+        down.push([ position[0]+1,position[1]  ]);
+        left.push([ position[0],  position[1]+1  ]);
+        right.push([ position[0],  position[1]-1  ]);
+        downLeft.push([ position[0]+1,  position[1]+1  ]);
+        downRight.push([ position[0]+1,  position[1]-1  ]);
+
+        list.push(up);
+        list.push(down);
+        list.push(left);
+        list.push(right);
+
+        list.push(upRight);
+        list.push(upLeft);
+        list.push(downRight);
+        list.push(downLeft);
+
+        if(arguments.length === 1){
+
+            app.MoveValidation.prototype.Lightpath(list,this.piece,false)
+            app.MoveValidation.prototype.CheckStrikeAble(list,this.piece,false,'axes')
+
+        }
+        return {
             tiles:{
                 move:list,
-                strike:strikeCoords
+                strike:list
             }
-        }
+        };
+    break;
+        case "N":
+        position = this.piece.getposition();
+        position[0] = parseInt(position[0]);
+        position[1] = parseInt(position[1]);
 
-    };
+        up.push([   position[0]-2,  position[1]+1  ], [ position[0]-2,  position[1]-1  ]);
+        left.push([ position[0]+1,  position[1]+2  ], [ position[0]-1,  position[1]+2  ]);
+        right.push([position[0]+1,  position[1]-2  ], [ position[0]-1,  position[1]-2  ]);
+        down.push([ position[0]+2,  position[1]+1  ], [ position[0]+2,  position[1]-1  ]);
 
-}
 
-app.ValidateRook = function ValidateRook(){
-    app.MoveValidation.apply(this,arguments)
-    var position,
-        list = [],
-        x,
-        y,
-        u,
-        d,
-        l,
-        r,
-        list = [],
-        up = [],
-        down = [],
-        left = [],
-        right = [],
-        nextPosition;
-    position = this.piece.position;
-    y = parseInt(position[0]);
-    x = parseInt(position[1]);
+        list.push(up);
+        list.push(down);
+        list.push(left);
+        list.push(right);
+        if(arguments.length === 1){
 
-    for(u = y; u > 0; u-=1){
-        nextPosition = [ u-1,position[1] ];
-        if(app.pieceClicked(nextPosition,'checks') == "empty" ){
-            up.push(nextPosition)
-        }else if(app.pieceClicked(nextPosition,'checks') == "enemy" || app.pieceClicked(nextPosition,'checks') == "player"){
-            up.push(nextPosition)
-            console.log('breaku des')
-            break;
+            app.MoveValidation.prototype.Lightpath(list,this.piece,true)
+            app.MoveValidation.prototype.CheckStrikeAble(list,this.piece,true,'axes')
 
         }
-
-    }
-    for(d = y; d <= 7; d+=1 )  {
-        nextPosition = [ d+1,position[1] ]
-        if(app.pieceClicked(nextPosition,'checks') == "empty" ){
-            down.push(nextPosition)
-        }else if(app.pieceClicked(nextPosition,'checks') == "enemy" || app.pieceClicked(nextPosition,'checks') == "player"){
-            down.push(nextPosition)
-            console.log('breaku des')
-            break;
-
-        }
-    }
-
-    for(l = x; l > 0; l-=1){
-        nextPosition = [position[0],l-1 ]
-        if(app.pieceClicked(nextPosition,'checks') == "empty" ){
-            left.push(nextPosition)
-        }else if(app.pieceClicked(nextPosition,'checks') == "enemy" || app.pieceClicked(nextPosition,'checks') == "player"){
-            left.push(nextPosition)
-            console.log('breaku des')
-            break;
-
-        }
-    }
-    for(r = x; r <= 7; r+=1 )  {
-        nextPosition = [position[0],r+1 ]
-
-        if(app.pieceClicked(nextPosition,'checks') == "empty" ){
-            right.push(nextPosition)
-        }else if(app.pieceClicked(nextPosition,'checks') == "enemy" || app.pieceClicked(nextPosition,'checks') == "player"){
-            right.push(nextPosition)
-            console.log('breaku des')
-            break;
-
-        }
-    }
-
-
-    coord = [parseInt(position[0]),parseInt(position[1])]
-    list.push(up);
-    list.push(down);
-    list.push(left);
-    list.push(right);
-
-    if(arguments.length === 1){
-        app.MoveValidation.prototype.Lightpath(list,this.piece,false)
-        app.MoveValidation.prototype.CheckStrikeAble(list,this.piece,false,"axes")
-
-
-    }
-    return {
-        tiles:{
-            move:list,
-            strike:list
-        }
+        return {
+            tiles:{
+                move:list,
+                strike:list
+            }
+        };
+        break;
     }
 }
 
-app.ValidateBishop = function ValidateBishop(){
-    app.MoveValidation.apply(this,arguments)
-    var
-        position,
-        list = [],
-        x,
-        y,
-        uR,
-        uL,
-        dR,
-        dL,
-        upRight = [],
-        upLeft = [],
-        downRight = [],
-        downLeft = [],
-        nextPosition,
-        position = this.piece.position;
-    y = parseInt(position[0]);
-    x = parseInt(position[1]);
-
-    for(uR = y; uR > 0; uR-=1){
-        nextPosition = [ uR-1,x+(y-uR)+1 ];
-        if(app.pieceClicked(nextPosition,'checks') == "empty" ){
-            upRight.push(nextPosition)
-        }else if(app.pieceClicked(nextPosition,'checks') == "enemy" || app.pieceClicked(nextPosition,'checks') == "player"){
-            upRight.push(nextPosition)
-            console.log('breaku des')
-            break;
-
-        }
-    }
-    for(uL = y; uL > 0; uL-=1){
-        nextPosition =[ uL-1,x-(y-uL)-1 ]
-        if(app.pieceClicked(nextPosition,'checks') == "empty" ){
-            upLeft.push(nextPosition)
-        }else if(app.pieceClicked(nextPosition,'checks') == "enemy" || app.pieceClicked(nextPosition,'checks') == "player"){
-            upLeft.push(nextPosition)
-            console.log('breaku des')
-            break;
-
-        }
-
-    }
-
-    for(dR = y; dR < 7; dR+=1){
-        nextPosition = [ dR+1,x+(y-dR)-1 ]
-        if(app.pieceClicked(nextPosition,'checks') == "empty" ){
-            downRight.push(nextPosition)
-        }else if(app.pieceClicked(nextPosition,'checks') == "enemy" || app.pieceClicked(nextPosition,'checks') == "player"){
-            downRight.push(nextPosition)
-            console.log('breaku des')
-            break;
-
-        }
-
-    }
-    for(dL = y; dL < 7; dL+=1){
-        nextPosition = [ dL+1,x-(y-dL)+1 ]
-        if(app.pieceClicked(nextPosition,'checks') == "empty" ){
-            downLeft.push(nextPosition)
-        }else if(app.pieceClicked(nextPosition,'checks') == "enemy" || app.pieceClicked(nextPosition,'checks') == "player"){
-            downLeft.push(nextPosition)
-            console.log('breaku des')
-            break;
-
-        }
-    }
 
 
-    list.push(upRight);
-    list.push(upLeft);
-    list.push(downRight);
-    list.push(downLeft);
-
-    if(arguments.length === 1){
-
-        app.MoveValidation.prototype.Lightpath(list,this.piece,false)
-        app.MoveValidation.prototype.CheckStrikeAble(list,this.piece,false,"diagonal")
-
-
-
-    }
-    return {
-        tiles:{
-            move:list,
-            strike:list
-        }
-    }}
-
-app.ValidateQueen = function ValidateQueen(){
-    app.MoveValidation.apply(this,arguments)
-    var
-        position,
-        list = [],
-        x,
-        y,
-        uR,
-        uL,
-        dR,
-        dL,
-        u,
-        d,
-        l,
-        r,
-        up = [],
-        down = [],
-        left = [],
-        right = [],
-
-        upRight = [],
-        upLeft = [],
-        downRight = [],
-        nextPosition,
-        downLeft = []
-    position = this.piece.position;
-    y = parseInt(position[0]);
-    x = parseInt(position[1]);
-
-
-
-    for(u = y; u > 0; u-=1){
-        nextPosition = [ u-1,position[1] ];
-        if(app.pieceClicked(nextPosition,'checks') == "empty" ){
-            up.push(nextPosition)
-        }else if(app.pieceClicked(nextPosition,'checks') == "enemy" || app.pieceClicked(nextPosition,'checks') == "player"){
-            up.push(nextPosition)
-            console.log('breaku des')
-            break;
-
-        }
-
-    }
-    for(d = y; d <= 7; d+=1 )  {
-        nextPosition = [ d+1,position[1] ]
-        if(app.pieceClicked(nextPosition,'checks') == "empty" ){
-            down.push(nextPosition)
-        }else if(app.pieceClicked(nextPosition,'checks') == "enemy" || app.pieceClicked(nextPosition,'checks') == "player"){
-            down.push(nextPosition)
-            console.log('breaku des')
-            break;
-
-        }
-    }
-
-    for(l = x; l > 0; l-=1){
-        nextPosition = [position[0],l-1 ]
-        if(app.pieceClicked(nextPosition,'checks') == "empty" ){
-            left.push(nextPosition)
-        }else if(app.pieceClicked(nextPosition,'checks') == "enemy" || app.pieceClicked(nextPosition,'checks') == "player"){
-            left.push(nextPosition)
-            console.log('breaku des')
-            break;
-
-        }
-    }
-    for(r = x; r <= 7; r+=1 )  {
-        nextPosition = [position[0],r+1 ]
-
-        if(app.pieceClicked(nextPosition,'checks') == "empty" ){
-            right.push(nextPosition)
-        }else if(app.pieceClicked(nextPosition,'checks') == "enemy" || app.pieceClicked(nextPosition,'checks') == "player"){
-            right.push(nextPosition)
-            console.log('breaku des')
-            break;
-
-        }
-    }
-
-    for(uR = y; uR > 0; uR-=1){
-        nextPosition = [ uR-1,x+(y-uR)+1 ];
-        if(app.pieceClicked(nextPosition,'checks') == "empty" ){
-            upRight.push(nextPosition)
-        }else if(app.pieceClicked(nextPosition,'checks') == "enemy" || app.pieceClicked(nextPosition,'checks') == "player"){
-            upRight.push(nextPosition)
-            console.log('breaku des')
-            break;
-
-        }
-    }
-    for(uL = y; uL > 0; uL-=1){
-        nextPosition =[ uL-1,x-(y-uL)-1 ]
-        if(app.pieceClicked(nextPosition,'checks') == "empty" ){
-            upLeft.push(nextPosition)
-        }else if(app.pieceClicked(nextPosition,'checks') == "enemy" || app.pieceClicked(nextPosition,'checks') == "player"){
-            upLeft.push(nextPosition)
-            console.log('breaku des')
-            break;
-
-        }
-
-    }
-
-    for(dR = y; dR < 7; dR+=1){
-        nextPosition = [ dR+1,x+(y-dR)-1 ]
-        if(app.pieceClicked(nextPosition,'checks') == "empty" ){
-            downRight.push(nextPosition)
-        }else if(app.pieceClicked(nextPosition,'checks') == "enemy" || app.pieceClicked(nextPosition,'checks') == "player"){
-            downRight.push(nextPosition)
-            console.log('breaku des')
-            break;
-
-        }
-
-    }
-    for(dL = y; dL < 7; dL+=1){
-        nextPosition = [ dL+1,x-(y-dL)+1 ]
-        if(app.pieceClicked(nextPosition,'checks') == "empty" ){
-            downLeft.push(nextPosition)
-        }else if(app.pieceClicked(nextPosition,'checks') == "enemy" || app.pieceClicked(nextPosition,'checks') == "player"){
-            downLeft.push(nextPosition)
-            console.log('breaku des')
-            break;
-
-        }
-    }
-
-
-
-    list.push(up);
-    list.push(down);
-    list.push(left);
-    list.push(right);
-
-    list.push(upRight);
-    list.push(upLeft);
-    list.push(downRight);
-    list.push(downLeft);
-
-    if(arguments.length === 1){
-
-
-        app.MoveValidation.prototype.Lightpath(list,this.piece,false)
-        app.MoveValidation.prototype.CheckStrikeAble(list,this.piece,false,"axes")
-
-
-    }
-
-    return {
-        move:list,
-        strike:list
-    }}
-
-app.ValidateKing = function ValidateKing(){
-    app.MoveValidation.apply(this,arguments)
-    var position,
-        up = [],
-        down = [],
-        left = [],
-        right = [],
-        upRight = [],
-        upLeft = [],
-        downRight = [],
-        downLeft = [],
-        list= [];
-
-    position = this.piece.getposition();
-    position[0] = parseInt(position[0]);
-    position[1] = parseInt(position[1]);
-    if(position[0]-1 >= 0){
-        up.push([ position[0]-1,position[1]  ]);
-        upRight.push([ position[0]-1,position[1]+1  ]);
-        upLeft.push([ position[0]-1,position[1]-1  ]);
-    }
-    down.push([ position[0]+1,position[1]  ]);
-    left.push([ position[0],  position[1]+1  ]);
-    right.push([ position[0],  position[1]-1  ]);
-    downLeft.push([ position[0]+1,  position[1]+1  ]);
-    downRight.push([ position[0]+1,  position[1]-1  ]);
-
-    list.push(up);
-    list.push(down);
-    list.push(left);
-    list.push(right);
-
-    list.push(upRight);
-    list.push(upLeft);
-    list.push(downRight);
-    list.push(downLeft);
-
-    if(arguments.length === 1){
-
-        app.MoveValidation.prototype.Lightpath(list,this.piece,false)
-        app.MoveValidation.prototype.CheckStrikeAble(list,this.piece,false,'axes')
-
-    }
-    return {
-        tiles:{
-            move:list,
-            strike:list
-        }
-    }}
-
-
-app.ValidateKnight = function ValidateKnight(){
-    app.MoveValidation.apply(this,arguments)
-    var position,
-        up = [],
-        down = [],
-        left = [],
-        right = [],
-        list= [];
-
-    position = this.piece.getposition();
-    position[0] = parseInt(position[0]);
-    position[1] = parseInt(position[1]);
-
-    up.push([   position[0]-2,  position[1]+1  ], [ position[0]-2,  position[1]-1  ]);
-    left.push([ position[0]+1,  position[1]+2  ], [ position[0]-1,  position[1]+2  ]);
-    right.push([position[0]+1,  position[1]-2  ], [ position[0]-1,  position[1]-2  ]);
-    down.push([ position[0]+2,  position[1]+1  ], [ position[0]+2,  position[1]-1  ]);
-
-
-    list.push(up);
-    list.push(down);
-    list.push(left);
-    list.push(right);
-    if(arguments.length === 1){
-
-        app.MoveValidation.prototype.Lightpath(list,this.piece,true)
-        app.MoveValidation.prototype.CheckStrikeAble(list,this.piece,true,'axes')
-
-    }
-    return {
-        tiles:{
-            move:list,
-            strike:list
-        }
-    }}
-
-
-
-app.ValidatePawn.prototype   = app.helper.inherit(app.MoveValidation.prototype);
-app.ValidateRook.prototype   = app.helper.inherit(app.MoveValidation.prototype);
-app.ValidateBishop.prototype = app.helper.inherit(app.MoveValidation.prototype);
-app.ValidateKnight.prototype = app.helper.inherit(app.MoveValidation.prototype);
-app.ValidateQueen.prototype  = app.helper.inherit(app.MoveValidation.prototype);
-app.ValidateKing.prototype   = app.helper.inherit(app.MoveValidation.prototype);
+    app.ValidateMovement.prototype   = app.helper.inherit(app.MoveValidation.prototype);

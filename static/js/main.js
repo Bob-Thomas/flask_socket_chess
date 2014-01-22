@@ -16,3 +16,23 @@ app.init = (function(){
     }
 }())
 
+
+
+app.soundManager = function(){
+    var
+        turn,
+        checkMate
+        ;
+        turn = new Audio('../audio/turn.mp3');
+        checkMate = new Audio('../audio/checkmate.mp3');
+
+    function playSound(sound){
+        console.log("play sound weee")
+        sound.src = sound.src;
+        sound.pause();
+        sound.currentTime = 0;
+        sound.play();
+    }
+};
+
+
