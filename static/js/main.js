@@ -33,6 +33,19 @@ app.soundManager = function(){
         sound.currentTime = 0;
         sound.play();
     }
+   
+   function turn() {
+	playSound(turn);
+   }
+   
+   function checkMate() {
+	playSound(checkMate);
+   }
+   
+   return {
+	turn:turn,
+	checkMate:checkMate
+   }
 };
 
 

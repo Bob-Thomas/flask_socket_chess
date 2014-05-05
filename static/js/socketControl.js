@@ -1,6 +1,6 @@
 socket.on('getTurn',function(data){
     console.log("test " + data)
-    app.soundManager().playS
+    app.soundManager().turn
     app.turn = data;
 
 })
