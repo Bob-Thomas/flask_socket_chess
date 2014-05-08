@@ -1,169 +1,181 @@
-from gevent import monkey;
-
-monkey.patch_all()
-from flask import Flask, request, session, g, redirect, url_for, \
-    abort, render_template, flash, send_from_directory
-from socketio import socketio_manage
-from socketio.namespace import BaseNamespace
-from socketio.mixins import RoomsMixin, BroadcastMixin
-from flask.ext.sqlalchemy import SQLAlchemy
-from chess import app
 import re
 from datetime import datetime
 import database
 import hashlib
+from chess import *
+from flask.ext.socketio import emit, send, join_room, leave_room, socketio_manage
 # The socket.io namespace
 rooms = []
 
 
-class Room(BaseNamespace, RoomsMixin, BroadcastMixin):
-    def on_move(self, data):
-        self.emit_to_room('main_room', 'move enemy', data)
-        print "ALA AKBHAR"
-
-    def on_sendMessageGameroom(self, data):
-
-        self.emit_to_room(data['hash'], 'gameMessage', data)
-
-    def on_turnOver(self, data):
-        print "boe"
-        print data
-        turn = ""
-        if data['turn'] == 'white':
-            turn = 'white'
-            self.emit_to_room(self.socket.session['room'], 'getTurn', turn)
-        else:
-            turn = 'black'
-            self.emit_to_room(self.socket.session['room'], 'getTurn', turn)
-        updateTurn(data['hash'], turn)
-
-    def on_gameOver(self,data):
-        updatePlayerScore(playersInRoom(self.socket.session['room'], 'banan', True),data)
-        self.emit_to_room(self.socket.session['room'], 'gameFinished',data)
-        self.emit('gameFinished',data)
-
-    def on_addDummy(self,data):
-        self.emit_to_room(self.socket.session['room'], 'addDummy', data)
-
-    def on_removeDummy(self,data):
-        self.emit_to_room(self.socket.session['room'], 'removeDummy', data)
+@socketio.on('move', namespace='/game')
+def move(data):
+    emit('move enemy', data, room='main_room')
 
 
-    def on_movePiece(self, data):
-        self.emit_to_room(self.socket.session['room'], 'moveEnemy', data)
-
-    def on_promotePiece(self, data):
-        self.emit_to_room(self.socket.session['room'], 'promotePiece', data)
-
-    def on_updateBoard(self, data):
-        updateBoard(data['hash'], data['board'])
-        self.emit_to_room(self.socket.session['room'], 'redrawBoard', data)
+@socketio.on('sendMessageGameroom', namespace='/game')
+def sendMessageGameroom(data):
+    emit('gameMessage', data, room=data['hash'])
 
 
-    def on_strikePiece(self, data):
-        self.emit_to_room(self.socket.session['room'], 'strikeEnemy', data)
-
-    def on_getTeam(self, data):
-        print data
-        self.socket.session['room'] = data['hash']
-        self.join(data['hash'])
-        print "spelers - " + str(playersInRoom(data['hash'], data['name'], False))
-        self.emit("playersInRoom", playersInRoom(data['hash'], data['name'], True))
-        if playersInRoom(data['hash'], data['name'], False) == 1:
-            team = 'white'
-            self.emit('receiveTeam', {'team': team,
-                                      'board': returnBoard(data['hash']),
-                                      'turn': returnTurn(data['hash'])}
-            )
-        elif playersInRoom(data['hash'], data['name'], False) == 2:
-            team = 'black'
-            self.emit('receiveTeam', {'team': team,
-                                      'board': returnBoard(data['hash']),
-                                      'turn': returnTurn(data['hash'])})
+@socketio.on('turnOver', namespace='/game')
+def turnOver(data):
+    print "boe"
+    print data
+    turn = ""
+    if data['turn'] == 'white':
+        turn = 'white'
+        emit('getTurn', turn, room=data['hash'])
+    else:
+        turn = 'black'
+        emit('getTurn', turn, room=data['hash'])
+    updateTurn(data['hash'], turn)
 
 
-    def on_enterLobby(self, data):
-        addRooms()
-        self.socket.session['nickname'] = data
-        print "test"
-        print self.socket.session['nickname']
+@socketio.on('gameOver', namespace='/game')
+def gameOver(data):
+    updatePlayerScore(playersInRoom(data['room'], 'banan', True), data)
+    emit('gameFinished', data, room=session['room'])
+
+
+@socketio.on('addDummy', namespace='/game')
+def addDummy(data):
+    emit('addDummy', data, room=session['room'])
+
+
+@socketio.on('removeDummy', namespace='/game')
+def removeDummy(data):
+    emit('removeDummy', data, room=session['room'])
+
+
+@socketio.on('movePiece', namespace='/game')
+def movePiece(data):
+    emit('moveEnemy', data, room=session['room'])
+
+
+@socketio.on('promotePiece', namespace='/game')
+def promotePiece(data):
+    emit('promotePiece', data, room=session['room'])
+
+
+@socketio.on('updateBoard', namespace='/game')
+def updateBoard(data):
+    updateBoard(data['hash'], data['board'])
+    emit('redrawBoard', data, room=session['room'])
+
+
+@socketio.on('strikePiece', namespace='/game')
+def strikePiece(data):
+    emit('strikeEnemy', data, room=session['room'])
+
+
+@socketio.on('getTeam', namespace='/game')
+def getTeam(data):
+    print data
+    session['room'] = data['hash']
+    join_room(session['room'])
+    print "spelers - " + str(playersInRoom(data['hash'], data['name'], False))
+    emit("playersInRoom", playersInRoom(data['hash'], data['name'], True))
+    if playersInRoom(data['hash'], data['name'], False) == 1:
+        team = 'white'
+        emit('receiveTeam', {'team': team,
+                             'board': returnBoard(data['hash']),
+                             'turn': returnTurn(data['hash'])}
+        )
+    elif playersInRoom(data['hash'], data['name'], False) == 2:
+        team = 'black'
+        emit('receiveTeam', {'team': team,
+                             'board': returnBoard(data['hash']),
+                             'turn': returnTurn(data['hash'])})
+
+
+@socketio.on('enterLobby', namespace='/game')
+def enterLobby(data):
+    addRooms()
+    session['nickname'] = data
+    print "test"
+    print session['nickname']
+    m = datetime.now().minute
+    h = datetime.now().hour
+    message = {
+        'rank': 'bK',
+        'name': "ALL MIGHTY SEVER",
+        'time': str(h) + ":" + str(m),
+        'message': '%s has connected' % session['nickname']
+    }
+    emit('message', message, broadcast=True)
+    # Just have them join a default-named room
+    join_room('lobby')
+    emit('nickname', {
+        'name': session['nickname'],
+        'rank': getUserRank(session['nickname']),
+        'wins': getUserStats(session['nickname'])['wins'],
+        'loses': getUserStats(session['nickname'])['loses']
+    })
+    emit('lobbyCreated', rooms, broadcast=True)
+    print "connected"
+
+
+@socketio.on('create', namespace='/lobby')
+def create(data):
+    print data['roomName']
+    createRoom(session['nickname'], data['roomName'])
+
+    room = {
+        'creatorRank': getUserRank(session['nickname']),
+        'creator': session['nickname'],
+        'name': data['roomName'],
+        'players': 1,
+        'inPlay': False,
+        'hash': getRoomHashByUser(session['nickname'])
+
+    }
+    print rooms
+    rooms.append(room)
+    emit('lobbyCreated', rooms, broadcast=True)
+
+
+@socketio.on('joinGame', namespace='/lobbby')
+def joinGame(data):
+    print "game Joined"
+    join_room(data['hash'])
+    addPlayerToRoom(data['name'], data['hash'])
+
+
+@socketio.on('sendMessage')
+def endMessage(msg):
+    print "boe"
+    emit('message', msg, broadcast=True)
+
+
+@socketio.on('verify', namespace='/')
+def verify(data):
+    if 'value' in data:
+        print data['value']
+        print "validating"
+        print checkUser(data['name'], data['value'], database.User, )
+        emit('validation',
+                  {'name': data['name'], 'answer': checkUser(data['name'], data['value'], database.User, )})
+
+@socketio.on('disconnect', namespace='/lobby')
+def disconnect():
+    # Remove nickname from the list
+    if 'nickname' in session:
+        nickname = session['nickname']
         m = datetime.now().minute
         h = datetime.now().hour
+        for item in rooms:
+            if item['creator'] == nickname:
+                rooms.remove(item)
         message = {
             'rank': 'bK',
             'name': "ALL MIGHTY SEVER",
             'time': str(h) + ":" + str(m),
-            'message': '%s has connected' % self.socket.session['nickname']
+            'message': '%s has disconnected' % nickname
         }
-        self.broadcast_event('message', message)
-        # Just have them join a default-named room
-        self.join('lobby')
-
-        self.emit('nickname', {
-            'name':  self.socket.session['nickname'],
-            'rank':  getUserRank(self.socket.session['nickname']),
-            'wins':  getUserStats(self.socket.session['nickname'])['wins'],
-            'loses': getUserStats(self.socket.session['nickname'])['loses']
-        })
-        self.broadcast_event('lobbyCreated', rooms)
-        print "connected"
-
-    def on_create(self, data):
-        print data['roomName']
-        createRoom(self.socket.session['nickname'], data['roomName'])
-
-        self.room = {
-            'creatorRank': getUserRank(self.socket.session['nickname']),
-            'creator': self.socket.session['nickname'],
-            'name': data['roomName'],
-            'players': 1,
-            'inPlay': False,
-            'hash': getRoomHashByUser(self.socket.session['nickname'])
-
-        }
-        print rooms
-        rooms.append(self.room)
-        self.broadcast_event('lobbyCreated', rooms)
-
-    def on_joinGame(self, data):
-        print "game Joined"
-        self.join(data['hash'])
-        addPlayerToRoom(data['name'], data['hash'])
-
-    def on_sendMessage(self, msg):
-        print "boe"
-        self.broadcast_event('message', msg)
-
-    def recv_message(self, message):
-        print "PING!!!", message
-
-    def on_verify(self, data):
-        if data.has_key('value'):
-            print data['value']
-            print "validating"
-            print checkUser(data['name'], data['value'], database.User, )
-            self.emit('validation',
-                      {'name': data['name'], 'answer': checkUser(data['name'], data['value'], database.User, )})
-
-    def recv_disconnect(self):
-        # Remove nickname from the list
-        if 'nickname' in self.socket.session:
-            nickname = self.socket.session['nickname']
-            m = datetime.now().minute
-            h = datetime.now().hour
-            for item in rooms:
-                if item['creator'] == nickname:
-                    rooms.remove(item)
-            message = {
-                'rank': 'bK',
-                'name': "ALL MIGHTY SEVER",
-                'time': str(h) + ":" + str(m),
-                'message': '%s has disconnected' % nickname
-            }
-            self.broadcast_event('message', message)
-            self.disconnect(silent=True)
-            self.broadcast_event('lobbyCreated', rooms)
-        return True
+        emit('message', message, broadcast=True)
+        emit('lobbyCreated', rooms, broadcast=True)
+    return True
 
 
 def checkUser(type, value, table):
@@ -227,7 +239,7 @@ def playersInRoom(hash, name, names):
     result = database.Room.query.all()
     if not names:
         for item in result:
-            if (item.roomHash == hash):
+            if item.roomHash == hash:
                 amountPlayers = item.players.split(',')
                 if len(amountPlayers) == 2:
                     for players in amountPlayers:
@@ -345,24 +357,27 @@ def updateTurn(hash, turn):
     database.Room.query.filter_by(roomHash=hash).update(dict(turn=str(turn)))
     database.db.session.commit()
 
-def updatePlayerScore(players,winner):
+
+def updatePlayerScore(players, winner):
     users = database.User.query.all()
-    print 'spelers die meedoen: '+players
+    print 'spelers die meedoen: ' + players
     players = players.split(',')
     if winner == 'white':
-        wins = int(database.User.query.filter_by(username=players[0]).first().wins)+1
+        wins = int(database.User.query.filter_by(username=players[0]).first().wins) + 1
         database.User.query.filter_by(username=players[0]).update(dict(wins=str(wins)))
-        loses = int(database.User.query.filter_by(username=players[1]).first().loses)+1
+        loses = int(database.User.query.filter_by(username=players[1]).first().loses) + 1
         database.User.query.filter_by(username=players[1]).update(dict(loses=str(loses)))
     elif winner == 'black':
-        wins = int(database.User.query.filter_by(username=players[1]).first().wins)+1
+        wins = int(database.User.query.filter_by(username=players[1]).first().wins) + 1
         database.User.query.filter_by(username=players[1]).update(dict(wins=str(wins)))
-        loses = int(database.User.query.filter_by(username=players[0]).first().loses)+1
+        loses = int(database.User.query.filter_by(username=players[0]).first().loses) + 1
         database.User.query.filter_by(username=players[0]).update(dict(loses=str(loses)))
     database.db.session.commit()
 
+
 def getUserStats(name):
     return {
-        'wins':database.User.query.filter_by(username=name).first().wins,
-        'loses':database.User.query.filter_by(username=name).first().loses
+        'wins': database.User.query.filter_by(username=name).first().wins,
+        'loses': database.User.query.filter_by(username=name).first().loses
     }
+
