@@ -6,10 +6,7 @@ import database
 
 app = Flask(__name__)
 app.config.from_object('config')
-from flask.ext.socketio import *
 
-
-socketio = SocketIO(app)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -41,7 +38,6 @@ def index():
             else:
                 return render_template('login.html')
     return render_template('login.html')
-
 
 
 
@@ -138,6 +134,7 @@ def checkin_db(exc):
 
 if __name__ == '__main__':
     port = 9000
+    from sockets import *
     print 'Listening on http://localhost:', port
     socketio.run(app, host="0.0.0.0", port=port)
 

@@ -2,9 +2,11 @@ import re
 from datetime import datetime
 import database
 import hashlib
+from flask.ext.socketio import *
 from chess import *
-# The socket.io namespace
+# The socket.io namespaces
 rooms = []
+socketio = SocketIO(app)
 
 
 @socketio.on('move', namespace='/game')
