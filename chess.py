@@ -1,14 +1,15 @@
 from flask import Flask, request, session, g, redirect, url_for, \
     abort, render_template, flash, send_from_directory
 import database
-from flask.ext.socketio import SocketIO
 
 # Flask routes
 
 app = Flask(__name__)
 app.config.from_object('config')
-socketio = SocketIO(app)
+from flask.ext.socketio import *
 
+
+socketio = SocketIO(app)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -138,12 +139,6 @@ def checkin_db(exc):
 if __name__ == '__main__':
     port = 9000
     print 'Listening on http://localhost:', port
-    app.debug = True
-    import os
-    from werkzeug.wsgi import SharedDataMiddleware
-    app = SharedDataMiddleware(app, {
-        '/': os.path.join(os.path.dirname(__file__), 'static')
-        })
     socketio.run(app, host="0.0.0.0", port=port)
 
 

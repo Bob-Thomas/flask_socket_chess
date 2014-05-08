@@ -91,7 +91,6 @@ app.controller('lobbyControl',["$scope","socket",function($scope,socket){
     $scope.userRank = ''
     $scope.stats = {wins:0,loses:0}
 
-
     socket.emit('enterLobby',$scope.userName);
 
     socket.on('nickname',function(data){

@@ -19,7 +19,7 @@
                 <div scroll-Div class="ui celled list chatBox" id="chat">
                     {%raw%}
                     <div hover-items hovercolor="rgba(0,0,0,0.2)" class="item"  ng-repeat="message in messages">
-                        <img class="ui avatar image" ng-src="../img/chesspieces/{{message['rank']}}.png">
+                        <img class="ui avatar image" ng-src="static/img/chesspieces/{{message['rank']}}.png">
                         <div class="content">
                             <div class="header" ng-bind="message['name']"></div>
                             <div class="item" ng-bind="message['time']"></div>
@@ -48,7 +48,7 @@
                     {%raw%}
 
                     <div room-items hover-items hovercolor="rgba(0,0,0,0.2)" class="item" ng-repeat="room in rooms">
-                        <img class="ui avatar image" ng-src="../img/chesspieces/{{room['creatorRank']}}.png">
+                        <img class="ui avatar image" ng-src="static/img/chesspieces/{{room['creatorRank']}}.png">
                         <div class="content">
                             <div class="header" ng-bind="room['name']"></div>
                             <div class="item" ng-bind="room['creator']"></div>
@@ -63,7 +63,7 @@
         <div class="column lobby-boxes">
             <div class="ui vertical fluid menu">
                 <div class="header item">Account <h1 class="ui header">
-                    <img class="ui avatar image" src="../img/chesspieces/{{avatar}}.png">{{user}}
+                    <img class="ui avatar image" src="static/img/chesspieces/{{avatar}}.png">{{user}}
                 </h1>
                    <div class="item">
                        <div class="wins" ng-bind="'wins:'+stats.wins"></div>

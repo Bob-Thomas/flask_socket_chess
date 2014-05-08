@@ -42,7 +42,7 @@ app.chatControl = function(){
                         hash:window.location.href.toString().split('/')[4],
                         avatar:avatar
                     })
-                    var html = '<div class="message"><div class="sender"><img src="../img/chesspieces/'+avatar+'.png" width="32" height="32" />'+name+'</div><div class="horizontalDivider"></div><div class="messageContent">'+input.value+'</div></div>'
+                    var html = '<div class="message"><div class="sender"><img src="static/img/chesspieces/'+avatar+'.png" width="32" height="32" />'+name+'</div><div class="horizontalDivider"></div><div class="messageContent">'+input.value+'</div></div>'
                     app.chatMessages.push(html)
                     messagebox.innerHTML = ''
                     for(var i =0;i<app.chatMessages.length;i++){

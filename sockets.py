@@ -3,7 +3,6 @@ from datetime import datetime
 import database
 import hashlib
 from chess import *
-from flask.ext.socketio import emit, send, join_room, leave_room, socketio_manage
 # The socket.io namespace
 rooms = []
 
@@ -89,8 +88,9 @@ def getTeam(data):
                              'turn': returnTurn(data['hash'])})
 
 
-@socketio.on('enterLobby', namespace='/game')
+@socketio.on('enterLobby', namespace='/lobby')
 def enterLobby(data):
+    print "WEEEEEEe"
     addRooms()
     session['nickname'] = data
     print "test"
@@ -135,7 +135,7 @@ def create(data):
     emit('lobbyCreated', rooms, broadcast=True)
 
 
-@socketio.on('joinGame', namespace='/lobbby')
+@socketio.on('joinGame', namespace='/lobby')
 def joinGame(data):
     print "game Joined"
     join_room(data['hash'])
@@ -148,7 +148,7 @@ def endMessage(msg):
     emit('message', msg, broadcast=True)
 
 
-@socketio.on('verify', namespace='/')
+@socketio.on('verify')
 def verify(data):
     if 'value' in data:
         print data['value']
@@ -157,7 +157,7 @@ def verify(data):
         emit('validation',
                   {'name': data['name'], 'answer': checkUser(data['name'], data['value'], database.User, )})
 
-@socketio.on('disconnect', namespace='/lobby')
+@socketio.on('disconnect')
 def disconnect():
     # Remove nickname from the list
     if 'nickname' in session:
