@@ -53,7 +53,7 @@ def lobby():
     else:
         return "you are not allowed to be here go away GROWL..."
 
-@app.route('/game/<room>', methods=['GET','POST'])
+@app.route('/game/<room>', methods=['GET', 'POST'])
 def game(room):
     roomHash = room
     print roomHash
@@ -134,6 +134,7 @@ def checkin_db(exc):
 
 if __name__ == '__main__':
     port = 9000
+    app.debug = True
     from sockets import *
     print 'Listening on http://localhost:', port
     socketio.run(app, host="0.0.0.0", port=port)

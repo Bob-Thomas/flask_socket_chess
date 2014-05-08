@@ -1,5 +1,5 @@
 app.factory('socket', function ($rootScope) {
-    var socket = io.connect();
+    var socket = io.connect("http://"+document.domain+":"+location.port+"/"+document.URL.split("/")[3]);
     return {
         on: function (eventName, callback) {
             socket.on(eventName, function () {
@@ -24,3 +24,5 @@ app.factory('socket', function ($rootScope) {
         }
     };
 });
+
+

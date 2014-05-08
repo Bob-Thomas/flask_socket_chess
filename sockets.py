@@ -11,7 +11,7 @@ socketio = SocketIO(app)
 
 @socketio.on('move', namespace='/game')
 def move(data):
-    emit('move enemy', data, room='main_room')
+    emit('move enemy', data)
 
 
 @socketio.on('sendMessageGameroom', namespace='/game')
@@ -144,7 +144,7 @@ def joinGame(data):
     addPlayerToRoom(data['name'], data['hash'])
 
 
-@socketio.on('sendMessage')
+@socketio.on('sendMessage', namespace="/lobby")
 def endMessage(msg):
     print "boe"
     emit('message', msg, broadcast=True)
@@ -159,7 +159,7 @@ def verify(data):
         emit('validation',
                   {'name': data['name'], 'answer': checkUser(data['name'], data['value'], database.User, )})
 
-@socketio.on('disconnect')
+@socketio.on('disconnect', namespace="/lobby")
 def disconnect():
     # Remove nickname from the list
     if 'nickname' in session:
