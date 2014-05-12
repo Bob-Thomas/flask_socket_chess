@@ -19,7 +19,7 @@ app.chatControl = function(){
 
     socket.on('gameMessage',function(data){
         console.log(messagebox)
-        var html = '<div class="message"><div class="sender"><img src="/img/chesspieces/'+data['avatar']+'.png" width="32" height="32" />'+data['sender']+'</div><div class="horizontalDivider"></div><div class="messageContent">'+data['message']+'</div></div>'
+        var html = '<div class="message"><div class="sender"><img src="/static/img/chesspieces/'+data['avatar']+'.png" width="32" height="32" />'+data['sender']+'</div><div class="horizontalDivider"></div><div class="messageContent">'+data['message']+'</div></div>'
         app.chatMessages.push(html)
         messagebox.innerHTML = ''
         for(var i =0;i<app.chatMessages.length;i++){
@@ -42,13 +42,13 @@ app.chatControl = function(){
                         hash:window.location.href.toString().split('/')[4],
                         avatar:avatar
                     })
-                    var html = '<div class="message"><div class="sender"><img src="static/img/chesspieces/'+avatar+'.png" width="32" height="32" />'+name+'</div><div class="horizontalDivider"></div><div class="messageContent">'+input.value+'</div></div>'
-                    app.chatMessages.push(html)
-                    messagebox.innerHTML = ''
-                    for(var i =0;i<app.chatMessages.length;i++){
-                        messagebox.innerHTML = messagebox.innerHTML+app.chatMessages[i]
-                    }
-                    messagebox.scrollTop = messagebox.scrollHeight;
+//                    var html = '<div class="message"><div class="sender"><img src="/static/img/chesspieces/'+avatar+'.png" width="32" height="32" />'+name+'</div><div class="horizontalDivider"></div><div class="messageContent">'+input.value+'</div></div>'
+//                    app.chatMessages.push(html)
+//                    messagebox.innerHTML = ''
+//                    for(var i =0;i<app.chatMessages.length;i++){
+//                        messagebox.innerHTML = messagebox.innerHTML+app.chatMessages[i]
+//                    }
+//                    messagebox.scrollTop = messagebox.scrollHeight;
                     input.value = ''
                 }
             }

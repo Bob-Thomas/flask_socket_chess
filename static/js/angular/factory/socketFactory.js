@@ -1,5 +1,6 @@
 app.factory('socket', function ($rootScope) {
-    var socket = io.connect("http://"+document.domain+":"+location.port+"/"+document.URL.split("/")[3]);
+//    var socket = io.connect("http://"+document.domain+":"+location.port+"/"+;
+    var socket = io.connect("http://chess.bmthomas.nl:9000/"+document.URL.split("/")[3]);
     return {
         on: function (eventName, callback) {
             socket.on(eventName, function () {

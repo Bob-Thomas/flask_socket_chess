@@ -22,7 +22,7 @@ socket.on('connect',function(){
 socket.on('playersInRoom',function(data){
     console.log("players" +data)
     var box = document.querySelectorAll('.information')[0];
-    box.innerHTML = data;
+    box.innerHTML = data.white+","+data.black;
 })
 socket.on("receiveTeam",function(data){
     var

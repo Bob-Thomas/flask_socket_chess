@@ -5,13 +5,16 @@ socket.on('getTurn',function(data){
 
 })
 socket.on('redrawBoard',function(data){
-    app.helper.clearDummy(app.enemy)
-    app.helper.parseBoard(data['board'],data['team'])
-    app.render()
-    console.log("history gogogo")
-    console.log(data)
-    if(data['oldPos']){
-        app.MoveValidation.prototype.showHistory(data['oldPos'],data['newPos'])
+    console.log("redrawing board")
+    if(data['team'] === app.enemy) {
+        app.helper.clearDummy(app.enemy)
+        app.helper.parseBoard(data['board'],data['team'])
+        app.render()
+        console.log("history gogogo")
+        console.log(data)
+        if(data['oldPos']){
+            app.MoveValidation.prototype.showHistory(data['oldPos'],data['newPos'])
+        }
     }
 })
 socket.on('moveEnemy',function(data){

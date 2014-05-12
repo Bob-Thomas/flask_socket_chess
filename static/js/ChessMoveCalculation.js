@@ -124,7 +124,7 @@ app.MoveValidation.prototype.Lightpath = function LightPath(tiles,piece,canJump)
                                 board:app.helper.parseBoard(),
                                 team:app.team,
                                 newPos:tileItem,
-                                oldPos:oldPos
+                                oldPos:oldPos,
                             })
                             socket.emit('turnOver',{
                                 turn:app.turn,

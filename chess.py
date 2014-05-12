@@ -57,41 +57,26 @@ def lobby():
 def game(room):
     roomHash = room
     print roomHash
-    result = database.Room.query.all()
-    for roomItem in result:
+    result = database.Room.query.filter_by(roomHash=roomHash).first()
+    if result:
+        print playersInRoom(roomHash, False)
         print "room name input " + room
-        print "room name database " + roomItem.players
         print "roomHash -> "+ roomHash
-        if roomItem.roomHash == str(roomHash):
-            if 'loggedIn' in session:
-                print len(roomItem.players.split(',') )
-                if len(roomItem.players.split(',')) <= 1:
-                    rank = database.User.query.all()
-                    avatar = ''
-                    for u in rank:
-                        if u.username.lower() == session['username'].lower():
-                            avatar = u.color+u.rank.title()
-                    result = None
-                    return render_template('game.html',user=session['username'],avatar=avatar)
-                else:
-                    users = database.User.query.all()
-                    for user in users:
-                        for roomName in roomItem.players.split(','):
-                            print session['username'].lower()
-                            print roomName.lower()
-                            if(session['username'].lower() == roomName.lower()):
-                                rank = database.User.query.all()
-                                avatar = ''
-                                for u in rank:
-                                    if u.username.lower() == session['username'].lower():
-                                        avatar = u.color+u.rank.title()
-                                result = None
-                                return render_template('game.html',user=session['username'],avatar=avatar)
-                        else:
-                            result = None
-                            return "this room is full"
+        if 'loggedIn' in session:
+            print "getting here ?"
+            if playersInRoom(roomHash, False) <= 2:
+                print "and here ?"
+                rank = database.User.query.filter_by(username=session['username']).first()
+                avatar = ''
+                if rank:
+                    avatar = rank.color+rank.rank.title()
+                result = None
+                return render_template('game.html', user=session['username'], avatar=avatar)
             else:
-                return "you are not allowed to be here go away GROWL... create an acount on <a href='www.bmthomas.nl:9000' >this site </a> Or LOGIN"
+                result = None
+                return "this room is full"
+        else:
+            return "you are not allowed to be here go away GROWL... create an acount on <a href='www.bmthomas.nl:9000' >this site </a> Or LOGIN"
 
     else:
         return "This room does not exist"
@@ -112,6 +97,26 @@ def login(user, pw):
     else:
         return False
 
+def playersInRoom(hash, names):
+    print "you called me"
+    room = database.Room.query.filter_by(roomHash=hash).first()
+    players = {
+        'white': "",
+        'black': ""
+    }
+    amount = 0
+    for player in room.players:
+        user = database.User.query.filter_by(id=player.user).first()
+        if player.user == room.creator:
+            players['white'] = user.username
+        else:
+            players['black'] = user.username
+        amount += 1
+
+    if names:
+        return players
+    else:
+        return amount
 
 def register(username, pw, repeat, email):
     result = database.User.query.all()
@@ -134,7 +139,6 @@ def checkin_db(exc):
 
 if __name__ == '__main__':
     port = 9000
-    app.debug = True
     from sockets import *
     print 'Listening on http://localhost:', port
     socketio.run(app, host="0.0.0.0", port=port)
