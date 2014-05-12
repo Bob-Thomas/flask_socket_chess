@@ -1,6 +1,8 @@
 socket.on('getTurn',function(data){
     console.log("test " + data)
-    app.soundManager().turn
+    if(data === app.team) {
+        app.soundManager().turn.play()
+    }
     app.turn = data;
 
 })

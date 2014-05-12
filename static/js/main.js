@@ -23,25 +23,10 @@ app.soundManager = function(){
         turn,
         checkMate
         ;
-        turn = new Audio('../audio/turn.mp3');
-        checkMate = new Audio('../audio/checkmate.mp3');
+        turn = new Audio('/static/audio/turn.wav');
+        checkMate = new Audio('/static/audio/checkmate.mp3');
 
-    function playSound(sound){
-        console.log("play sound weee")
-        sound.src = sound.src;
-        sound.pause();
-        sound.currentTime = 0;
-        sound.play();
-    }
-   
-   function turn() {
-	playSound(turn);
-   }
-   
-   function checkMate() {
-	playSound(checkMate);
-   }
-   
+
    return {
 	turn:turn,
 	checkMate:checkMate

@@ -278,7 +278,7 @@ app.MoveValidation.prototype.CheckStrikeAble =  function CheckStrikeAble(strikeC
                     ctx.restore();
                     if(app.pieceClicked(tileItem,'check','return').getId() === app.enemy[0]+"K"){
                         console.log("CHECKES")
-                        app.soundManager().checkMate;
+                        app.soundManager().checkMate.play();
                         return
                     }
                     if(canJump === false && direction === "axes"){
